@@ -1,0 +1,89 @@
+﻿slug,sefer_en,hilchot_en,hilchot_he,weight,rationale
+"Mishneh_Torah,_Transmission_of_the_Oral_Law",Introduction,Transmission of the Oral Law,מסירת תורה שבעל פה,0.75,Historical narrative: Mesorah chain from Moshe to the Geonim; why the Rambam wrote the Yad
+"Mishneh_Torah,_Positive_Mitzvot",Introduction,Positive Mitzvot,מצוות עשה,0.5,Reference list of the 248 positive mitzvot; scan/read-through
+"Mishneh_Torah,_Negative_Mitzvot",Introduction,Negative Mitzvot,מצוות לא תעשה,0.5,Reference list of the 365 negative mitzvot; scan/read-through
+"Mishneh_Torah,_Overview_of_Mishneh_Torah_Contents",Introduction,Overview of Mishneh Torah Contents,תוכן החיבור,0.5,Overview of the Yad's structure (sefarim/hilchot/perakim); read-through
+"Mishneh_Torah,_Foundations_of_the_Torah",Sefer Madda,Foundations of the Torah,הלכות יסודי התורה,1.25,"Theology & philosophy (Ma'aseh Bereishit, foundations of faith); abstract concepts"
+"Mishneh_Torah,_Human_Dispositions",Sefer Madda,Human Dispositions,הלכות דעות,0.75,Accessible ethical teaching; widely learned
+"Mishneh_Torah,_Torah_Study",Sefer Madda,Torah Study,הלכות תלמוד תורה,0.75,"Familiar, practical laws of learning Torah"
+"Mishneh_Torah,_Foreign_Worship_and_Customs_of_the_Nations",Sefer Madda,Foreign Worship and Customs of the Nations,הלכות עבודה זרה וחוקות הגויים,1.25,Unfamiliar idolatry practices and prohibitions; abstract elements
+"Mishneh_Torah,_Repentance",Sefer Madda,Repentance,הלכות תשובה,1.0,Conceptual but very familiar (Elul/Yamim Noraim material)
+"Mishneh_Torah,_Reading_the_Shema",Sefer Ahavah,Reading the Shema,הלכות קריאת שמע,1.0,Practical and familiar; timing and obligation details
+"Mishneh_Torah,_Prayer_and_the_Priestly_Blessing",Sefer Ahavah,Prayer and the Priestly Blessing,הלכות תפילה וברכת כהנים,1.0,Long but well-structured; tefillah obligations
+"Mishneh_Torah,_Tefillin,_Mezuzah_and_the_Torah_Scroll",Sefer Ahavah,"Tefillin, Mezuzah and the Torah Scroll",הלכות תפילין ומזוזה וספר תורה,1.25,"Many precise technical specifications (writing, construction)"
+"Mishneh_Torah,_Fringes",Sefer Ahavah,Fringes,הלכות ציצית,0.75,Short and practical
+"Mishneh_Torah,_Blessings",Sefer Ahavah,Blessings,הלכות ברכות,0.75,Familiar and practical
+"Mishneh_Torah,_Circumcision",Sefer Ahavah,Circumcision,הלכות מילה,0.75,Short and practical
+"Mishneh_Torah,_The_Order_of_Prayer",Sefer Ahavah,The Order of Prayer,סדר התפילה,0.5,Liturgical text (nusach); read-through rather than analysis
+"Mishneh_Torah,_Sabbath",Sefer Zemanim,Sabbath,הלכות שבת,1.5,Densest hilchot; 39 melachot with deep conceptual categories
+"Mishneh_Torah,_Eruvin",Sefer Zemanim,Eruvin,הלכות עירובין,1.5,Spatial and abstract reasoning; notoriously intricate
+"Mishneh_Torah,_Rest_on_the_Tenth_of_Tishrei",Sefer Zemanim,Rest on the Tenth of Tishrei,הלכות שביתת עשור,1.0,Short and familiar (Yom Kippur)
+"Mishneh_Torah,_Rest_on_a_Holiday",Sefer Zemanim,Rest on a Holiday,הלכות שביתת יום טוב,1.0,Familiar cooking/carrying rules
+"Mishneh_Torah,_Leavened_and_Unleavened_Bread",Sefer Zemanim,Leavened and Unleavened Bread,הלכות חמץ ומצה,1.25,"Familiar but detailed (bedikah, bitul, matzah requirements)"
+"Mishneh_Torah,_Shofar,_Sukkah_and_Lulav",Sefer Zemanim,"Shofar, Sukkah and Lulav",הלכות שופר וסוכה ולולב,1.0,Practical and familiar
+"Mishneh_Torah,_Sheqel_Dues",Sefer Zemanim,Sheqel Dues,הלכות שקלים,1.25,Temple finances; unfamiliar
+"Mishneh_Torah,_Sanctification_of_the_New_Month",Sefer Zemanim,Sanctification of the New Month,הלכות קידוש החודש,1.5,Calendar arithmetic and astronomy; mathematically heavy
+"Mishneh_Torah,_Fasts",Sefer Zemanim,Fasts,הלכות תעניות,0.75,Straightforward
+"Mishneh_Torah,_Scroll_of_Esther_and_Hanukkah",Sefer Zemanim,Scroll of Esther and Hanukkah,הלכות מגילה וחנוכה,0.75,Familiar; narrative sections
+"Mishneh_Torah,_Marriage",Sefer Nashim,Marriage,הלכות אישות,1.5,Longest sugya-heavy civil hilchot; complex obligations and kinyanim
+"Mishneh_Torah,_Divorce",Sefer Nashim,Divorce,הלכות גירושין,1.5,Intricate get and agency law
+"Mishneh_Torah,_Levirate_Marriage_and_Release",Sefer Nashim,Levirate Marriage and Release,הלכות יבום וחליצה,1.25,Multi-party case analysis
+"Mishneh_Torah,_Virgin_Maiden",Sefer Nashim,Virgin Maiden,הלכות נערה בתולה,1.0,Short
+"Mishneh_Torah,_Woman_Suspected_of_Infidelity",Sefer Nashim,Woman Suspected of Infidelity,הלכות סוטה,1.0,Familiar from the Torah narrative
+"Mishneh_Torah,_Forbidden_Intercourse",Sefer Kedushah,Forbidden Intercourse,הלכות איסורי ביאה,1.5,Complex lineage and karet categories; dense
+"Mishneh_Torah,_Forbidden_Foods",Sefer Kedushah,Forbidden Foods,הלכות מאכלות אסורות,1.25,Mixture ratios; species identification
+"Mishneh_Torah,_Ritual_Slaughter",Sefer Kedushah,Ritual Slaughter,הלכות שחיטה,1.0,Technical but self-contained
+"Mishneh_Torah,_Oaths",Sefer Haflaah,Oaths,הלכות שבועות,1.25,Conceptual categories of oaths
+"Mishneh_Torah,_Vows",Sefer Haflaah,Vows,הלכות נדרים,1.25,Linguistically intricate
+"Mishneh_Torah,_Nazariteship",Sefer Haflaah,Nazariteship,הלכות נזירות,1.0,Self-contained
+"Mishneh_Torah,_Appraisals_and_Devoted_Property",Sefer Haflaah,Appraisals and Devoted Property,הלכות ערכים וחרמין,1.0,Self-contained Temple valuations
+"Mishneh_Torah,_Diverse_Species",Sefer Zeraim,Diverse Species,הלכות כלאים,1.25,Agricultural/botanical; unfamiliar
+"Mishneh_Torah,_Gifts_to_the_Poor",Sefer Zeraim,Gifts to the Poor,הלכות מתנות עניים,1.0,Practical agricultural gifts
+"Mishneh_Torah,_Heave_Offerings",Sefer Zeraim,Heave Offerings,הלכות תרומות,1.5,Complex kedushah and mixture rules
+"Mishneh_Torah,_Tithes",Sefer Zeraim,Tithes,הלכות מעשרות,1.25,Tithing order; produce classification
+"Mishneh_Torah,_Second_Tithes_and_Fourth_Year's_Fruit",Sefer Zeraim,Second Tithes and Fourth Year's Fruit,הלכות מעשר שני ונטע רבעי,1.0,Redemption mechanics
+"Mishneh_Torah,_First_Fruits_and_other_Gifts_to_Priests_Outside_the_Sanctuary",Sefer Zeraim,First Fruits and other Gifts to Priests Outside the Sanctuary,הלכות ביכורים ושאר מתנות כהונה שבגבולין,0.75,Familiar from the Torah; lighter
+"Mishneh_Torah,_Sabbatical_Year_and_the_Jubilee",Sefer Zeraim,Sabbatical Year and the Jubilee,הלכות שמיטה ויובל,1.25,Land kedushah and cycle-counting intricacies
+"Mishneh_Torah,_The_Chosen_Temple",Sefer Avodah,The Chosen Temple,הלכות בית הבחירה,1.25,Architectural measurements; unfamiliar structure
+"Mishneh_Torah,_Vessels_of_the_Sanctuary_and_Those_Who_Serve_Therein",Sefer Avodah,Vessels of the Sanctuary and Those Who Serve Therein,הלכות כלי המקדש והעובדין בו,1.0,Vessels and their service
+"Mishneh_Torah,_Admission_into_the_Sanctuary",Sefer Avodah,Admission into the Sanctuary,הלכות ביאת מקדש,1.0,Purity-based entry rules
+"Mishneh_Torah,_Things_Forbidden_on_the_Altar",Sefer Avodah,Things Forbidden on the Altar,הלכות איסורי המזבח,1.0,Blemish lists; detailed but straightforward
+"Mishneh_Torah,_Sacrificial_Procedure",Sefer Avodah,Sacrificial Procedure,הלכות מעשה הקרבנות,1.0,Procedural service details
+"Mishneh_Torah,_Daily_Offerings_and_Additional_Offerings",Sefer Avodah,Daily Offerings and Additional Offerings,הלכות תמידים ומוספין,1.0,Calendar-linked offerings; repetitive structure
+"Mishneh_Torah,_Sacrifices_Rendered_Unfit",Sefer Avodah,Sacrifices Rendered Unfit,הלכות פסולי המוקדשין,1.25,"Abstract invalidation logic (piggul, notar)"
+"Mishneh_Torah,_Service_on_the_Day_of_Atonement",Sefer Avodah,Service on the Day of Atonement,הלכות עבודת יום הכפורים,1.0,Familiar (read on Yom Kippur)
+"Mishneh_Torah,_Trespass",Sefer Avodah,Trespass,הלכות מעילה,1.25,Conceptual me'ilah rules
+"Mishneh_Torah,_Paschal_Offering",Sefer Korbanot,Paschal Offering,הלכות קרבן פסח,1.0,Familiar
+"Mishneh_Torah,_Festival_Offering",Sefer Korbanot,Festival Offering,הלכות חגיגה,1.0,Short
+"Mishneh_Torah,_Firstlings",Sefer Korbanot,Firstlings,הלכות בכורות,1.25,Mixed firstborn/blemish laws
+"Mishneh_Torah,_Offerings_for_Unintentional_Transgressions",Sefer Korbanot,Offerings for Unintentional Transgressions,הלכות שגגות,1.25,Intricate chatat obligations
+"Mishneh_Torah,_Offerings_for_Those_with_Incomplete_Atonement",Sefer Korbanot,Offerings for Those with Incomplete Atonement,הלכות מחוסרי כפרה,1.0,Short
+"Mishneh_Torah,_Substitution",Sefer Korbanot,Substitution,הלכות תמורה,1.25,Conceptual temurah rules
+"Mishneh_Torah,_Defilement_by_a_Corpse",Sefer Taharah,Defilement by a Corpse,הלכות טומאת מת,1.5,Abstract ohel/tent logic
+"Mishneh_Torah,_Red_Heifer",Sefer Taharah,Red Heifer,הלכות פרה אדומה,1.25,"Intricate, counterintuitive laws"
+"Mishneh_Torah,_Defilement_by_Leprosy",Sefer Taharah,Defilement by Leprosy,הלכות טומאת צרעת,1.5,Unfamiliar; highly detailed signs
+"Mishneh_Torah,_Those_Who_Defile_Bed_or_Seat",Sefer Taharah,Those Who Defile Bed or Seat,הלכות מטמאי משכב ומושב,1.25,Layered impurity transmission
+"Mishneh_Torah,_Other_Sources_of_Defilement",Sefer Taharah,Other Sources of Defilement,הלכות שאר אבות הטומאות,1.25,Impurity taxonomy
+"Mishneh_Torah,_Defilement_of_Foods",Sefer Taharah,Defilement of Foods,הלכות טומאת אוכלים,1.25,Food impurity chains
+"Mishneh_Torah,_Vessels",Sefer Taharah,Vessels,הלכות כלים,1.5,"Long, abstract taxonomy of vessel materials"
+"Mishneh_Torah,_Immersion_Pools",Sefer Taharah,Immersion Pools,הלכות מקואות,1.0,Practical water requirements
+"Mishneh_Torah,_Damages_to_Property",Sefer Nezikim,Damages to Property,הלכות נזקי ממון,1.5,Bava Kamma sugyot; analytic case distinctions
+"Mishneh_Torah,_Theft",Sefer Nezikim,Theft,הלכות גניבה,1.25,Penalties and double payments
+"Mishneh_Torah,_Robbery_and_Lost_Property",Sefer Nezikim,Robbery and Lost Property,הלכות גזילה ואבידה,1.25,Familiar (hashavat aveidah) but wide-ranging
+"Mishneh_Torah,_One_Who_Injures_a_Person_or_Property",Sefer Nezikim,One Who Injures a Person or Property,הלכות חובל ומזיק,1.25,Injury assessments; five payments
+"Mishneh_Torah,_Murderer_and_the_Preservation_of_Life",Sefer Nezikim,Murderer and the Preservation of Life,הלכות רוצח ושמירת נפש,1.0,Mostly clear principles
+"Mishneh_Torah,_Sales",Sefer Kinyan,Sales,הלכות מכירה,1.25,Kinyan mechanics; ona'ah; mekach ta'ut
+"Mishneh_Torah,_Ownerless_Property_and_Gifts",Sefer Kinyan,Ownerless Property and Gifts,הלכות זכייה ומתנה,1.0,Straightforward acquisition law
+"Mishneh_Torah,_Neighbors",Sefer Kinyan,Neighbors,הלכות שכנים,0.75,"Short, practical neighbour law"
+"Mishneh_Torah,_Agents_and_Partners",Sefer Kinyan,Agents and Partners,הלכות שלוחין ושותפין,1.0,Compact agency law
+"Mishneh_Torah,_Slaves",Sefer Kinyan,Slaves,הלכות עבדים,1.0,Self-contained
+"Mishneh_Torah,_Hiring",Sefer Mishpatim,Hiring,הלכות שכירות,1.0,Four shomrim; familiar
+"Mishneh_Torah,_Borrowing_and_Deposit",Sefer Mishpatim,Borrowing and Deposit,הלכות שאלה ופיקדון,1.0,Short; familiar categories
+"Mishneh_Torah,_Creditor_and_Debtor",Sefer Mishpatim,Creditor and Debtor,הלכות מלווה ולווה,1.5,Collateral law; intricate ribit rules
+"Mishneh_Torah,_Plaintiff_and_Defendant",Sefer Mishpatim,Plaintiff and Defendant,הלכות טוען ונטען,1.25,Court procedure and oaths
+"Mishneh_Torah,_Inheritances",Sefer Mishpatim,Inheritances,הלכות נחלות,1.25,Estate law
+"Mishneh_Torah,_The_Sanhedrin_and_the_Penalties_within_Their_Jurisdiction",Sefer Shoftim,The Sanhedrin and the Penalties within Their Jurisdiction,הלכות סנהדרין והעונשין המסורין להם,1.25,Court structure; procedure; penalties
+"Mishneh_Torah,_Testimony",Sefer Shoftim,Testimony,הלכות עדות,1.25,Witness disqualifications; detailed
+"Mishneh_Torah,_Rebels",Sefer Shoftim,Rebels,הלכות ממרים,1.0,Short; conceptual
+"Mishneh_Torah,_Mourning",Sefer Shoftim,Mourning,הלכות אבל,1.0,Familiar mourning practice
+"Mishneh_Torah,_Kings_and_Wars",Sefer Shoftim,Kings and Wars,הלכות מלכים ומלחמות,0.75,Accessible; well-known Messianic sections
