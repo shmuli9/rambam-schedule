@@ -7,6 +7,9 @@ faster (more perakim/day) and hard sections go slower (partial perakim).
 
 Skips Shabbos, Erev Shabbos, Yom Tov, Erev Yom Tov and Tisha B'Av.
 
+**Live copy:** <https://shmuli9.github.io/rambam-schedule/> — the interactive
+schedules served straight from this repo by GitHub Pages.
+
 ## Your current schedule
 
 | Setting | Value |
@@ -57,6 +60,8 @@ to ~5.1 years; raise `--budget` or trim weights if that's too slow.
 - `generate_schedule.py` — builds the schedule; writes XLSX + PDF + HTML + ICS.
 - `data/weights.csv` — per-hilchot difficulty weights (**user-editable**).
 - `data/rambam.json` — cached Sefaria data.
+- `index.html` — landing page (the GitHub Pages root) linking both interactive
+  schedules and their XLSX/PDF/ICS downloads.
 - `output/rambam_schedule.xlsx` — Schedule sheet (one row per day) + Summary.
 - `output/rambam_schedule.pdf` — landscape PDF with Hebrew.
 - `output/rambam_schedule.html` — self-contained interactive table. Its
