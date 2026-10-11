@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rambam Yad \u2014 Learning Schedule</title>
+<style>
+  :root { --head:#1f4e79; --line:#cfd6dd; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:"Segoe UI", Arial, sans-serif; background:#f5f6f8; color:#222; }
+  header { background:var(--head); color:#fff; padding:18px 24px; }
+  header h1 { margin:0; font-size:22px; }
+  header .sub { opacity:.85; font-size:13px; margin-top:6px; }
+  main { max-width: 900px; margin: 0 auto; padding: 24px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:8px;
+          padding:16px 18px; margin-bottom:16px; }
+  .card h2 { margin:0 0 4px; font-size:17px; }
+  .card h2 a { color:var(--head); text-decoration:none; }
+  .card h2 a:hover { text-decoration:underline; }
+  .card .meta { font-size:13px; color:#555; margin-bottom:10px; }
+  .links { display:flex; flex-wrap:wrap; gap:8px; }
+  .links a { font-size:13px; text-decoration:none; padding:6px 10px; border:1px solid var(--line);
+             border-radius:4px; background:#fbfcfd; color:#22405c; }
+  .links a.primary { background:var(--head); color:#fff; border-color:var(--head); }
+  .links a:hover { border-color:var(--head); }
+  ul.notes { font-size:13px; color:#444; line-height:1.55; padding-left:20px; }
+  code { background:#eef1f4; padding:1px 4px; border-radius:3px; font-size:12px; }
+  footer { font-size:12px; color:#666; text-align:center; padding: 10px 0 30px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Rambam Yad \u2014 Learning Schedule</h1>
+  <div class="sub">A personalised Mishneh Torah cycle on a difficulty-weighted word budget \u00b7
+    start 12 Oct 2026 \u00b7 Diaspora (UK) calendar</div>
+</header>
+<main>
+  <div class="card">
+    <p style="margin:0 0 10px; font-size:14px;">
+      Each learning day costs roughly the same <strong>effort</strong> \u2014 words \u00d7 the
+      difficulty weight of the hilchot \u2014 so easy sefarim go faster (several perakim a day)
+      and hard ones slower (part of a perek). Shabbos, Erev Shabbos, Yom Tov, Erev Yom Tov and
+      Tisha B'Av are off; Chol HaMoed, Chanukah, Purim and Rosh Chodesh are learning days.
+    </p>
+    <p style="margin:0; font-size:13px; color:#555;">
+      Open a schedule below and use the <strong>Effort/day</strong> control at the top to try any
+      pace \u2014 the whole table, the completion date and the .ics export update instantly.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2><a href="output/rambam_schedule.html">Interactive schedule \u2014 default pace</a></h2>
+    <div class="meta">~788 effort/day \u00b7 1,248 learning days \u00b7 finishes
+      Sunday, 2 November 2031 (5.1 years) \u00b7 the same pace as the old 15-halachot/day cycle</div>
+    <div class="links">
+      <a class="primary" href="output/rambam_schedule.html">Open interactive table</a>
+      <a href="output/rambam_schedule.xlsx">XLSX</a>
+      <a href="output/rambam_schedule.pdf">PDF</a>
+      <a href="output/rambam_schedule.ics">ICS calendar</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><a href="output/rambam_schedule_b1000.html">Interactive schedule \u2014 faster pace</a></h2>
+    <div class="meta">1,000 effort/day \u00b7 973 learning days \u00b7 finishes
+      Thursday, 12 September 2030 (3.9 years)</div>
+    <div class="links">
+      <a class="primary" href="output/rambam_schedule_b1000.html">Open interactive table</a>
+      <a href="output/rambam_schedule_b1000.xlsx">XLSX</a>
+      <a href="output/rambam_schedule_b1000.pdf">PDF</a>
+      <a href="output/rambam_schedule_b1000.ics">ICS calendar</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>How it works</h2>
+    <ul class="notes">
+      <li><strong>Effort</strong> = word count \u00d7 difficulty weight
+        (<code>data/weights.csv</code> \u2014 0.5 for read-throughs up to 1.5 for Shabbat, Ishut,
+        Nizkei Mamon and friends). Edit it to taste.</li>
+      <li>Short/easy perakim are combined; long/hard ones are split at halacha boundaries;
+        a single halacha never gets split.</li>
+      <li>The interactive tables carry the perek/word/weight data and enough Hebrew calendar to
+        re-pace themselves offline \u2014 they are one self-contained file each, no dependencies.</li>
+      <li>In a schedule page use <strong>Export .ics</strong> for the pace you are looking at, or
+        press <strong>Ctrl/Cmd+P</strong> for a landscape printout.</li>
+      <li>Everything is regenerated with <code>python generate_schedule.py</code> \u2014
+        see the README for flags (<code>--budget</code>, <code>--start</code>, <code>--israel</code>,
+        <code>--no-weights</code>, \u2026).</li>
+    </ul>
+  </div>
+</main>
+<footer>Generated from the <a href="https://github.com/shmuli9/rambam-schedule">rambam-schedule</a>
+  repository \u00b7 word counts from <a href="https://www.sefaria.org">Sefaria</a></footer>
+</body>
+</html>
