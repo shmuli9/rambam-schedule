@@ -65,14 +65,15 @@ to ~5.1 years; raise `--budget` or trim weights if that's too slow.
 - `output/rambam_schedule.xlsx` — Schedule sheet (one row per day) + Summary.
 - `output/rambam_schedule.pdf` — landscape PDF with Hebrew.
 - `output/rambam_schedule.html` — self-contained interactive table. Its
-  headline feature is the **"Effort/day" control** (slider + number box): it
-  re-paces the *entire* cycle in the browser — day numbers, dates, completion
-  date, the Effort column and the .ics export all update instantly, so you can
-  dial the pace without re-running anything. Also: click any header to sort
-  (numeric-aware), search box, sefer/type filters, "hide skipped days" toggle,
-  **Weight column**, print stylesheet (A4 landscape via browser print) and an
-  **"Export .ics" button** for the pace currently on screen. No dependencies —
-  opens in any browser.
+  headline feature is the pair of controls at the top: a **Start** date picker
+  and an **"Effort/day"** slider (or type either value). Changing either one
+  re-paces the *entire* cycle in the browser — day numbers, dates, Hebrew
+  dates, completion date, the Effort column and the .ics export all update
+  instantly, so you can try any start + pace combination without re-running
+  anything. Also: click any header to sort (numeric-aware), search box,
+  sefer/type filters, "hide skipped days" toggle, **Weight column**, print
+  stylesheet (A4 landscape via browser print) and an **"Export .ics" button**
+  for the schedule currently on screen. No dependencies — opens in any browser.
 - `output/rambam_schedule.ics` — static snapshot at the `--budget` pace:
   1,248 all-day events ("Rambam #N: …"), importable into Apple Calendar,
   Gmail, Outlook, etc. Skipped days are not included. (For another pace, use
@@ -109,6 +110,8 @@ python generate_schedule.py --start 2026-10-12 --israel --outdir output --no-pdf
 | `--no-weights` | off | Treat every hilchot as weight 1.0 |
 | `--israel` | off | Israel calendar instead of diaspora |
 | `--min-effort` | 250 | Slowest pace offered by the HTML effort control; also sizes the Hebrew-calendar window the HTML embeds (lower values ⇒ bigger HTML file, slower generation) |
+| `--window-start` | today | Earliest date offered by the HTML start control |
+| `--latest-start` | auto | Latest date offered by the HTML start control; the window must still fit the slowest pace from there, so pushing it out enlarges the HTML file |
 
 ## How the pacing works
 
@@ -142,4 +145,8 @@ PDF Hebrew rendering uses `C:\Windows\Fonts\arial.ttf` (falls back to DejaVu).
 - The HTML carries the perek/word/weight data and enough Hebrew calendar to
   re-pace itself, which is why it behaves exactly like the generated
   XLSX/PDF (same effort numbers, same rounding) at every pace.
+- In the HTML you can move both ends: **Start** has a range of dates it can
+  serve (the XLSX/PDF/ICS files stay at `--start`), and **Effort/day** works
+  down to `--min-effort`. Pick a start date outside the range or an effort
+  below the floor and the page tells you instead of quietly truncating.
 - Refresh Sefaria data: delete `data/rambam.json` and re-run `python fetch_data.py`.

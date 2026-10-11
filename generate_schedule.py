@@ -630,6 +630,37 @@ def _calendar_window(start, n_days, diaspora=True):
     return out
 
 
+def _first_index(days, start_iso):
+    """Index of the first window day on/after `start_iso` (ISO dates sort as strings)."""
+    for i, (iso, _heb, _reason) in enumerate(days):
+        if iso >= start_iso:
+            return i
+    return max(0, len(days) - 1)
+
+
+def _learning_days_needed(entries, budget, max_perakim, min_split_words):
+    """Learning days the whole Yad needs at `budget` effort/day."""
+    cur = Cursor(entries)
+    n = 0
+    while not cur.done:
+        cur.next_day(budget, round(budget * 0.08), max_perakim, min_split_words)
+        n += 1
+    return n
+
+
+def _latest_start_index(days, needed):
+    """Latest window index that still leaves `needed` learning days after it."""
+    remaining = 0
+    best = 0
+    for i in range(len(days) - 1, -1, -1):
+        if not days[i][2]:          # a learning day
+            remaining += 1
+        if remaining >= needed:
+            best = i
+            break
+    return best
+
+
 def _fits(days, entries, budget, max_perakim, min_split_words):
     """True if `days` (from _calendar_window) are enough to finish at `budget`."""
     cur = Cursor(entries)
@@ -671,17 +702,28 @@ def write_html(entries, params, out_path):
     total_words = sum(sum(e["halacha_words"]) for e in entries)
     total_effort = sum(sum(e["halacha_words"]) * e["weight"] for e in entries)
 
-    # Calendar window: must reach the finish even at the slowest on-screen
-    # pace. Estimate it, then verify against the real calendar and grow it
-    # until the whole Yad fits.
+    # Calendar window behind the HTML's start-date control: it runs from
+    # `window_start` (today at the latest) and must still reach the finish at
+    # the slowest on-screen pace starting from params["start"].
     min_effort = float(params.get("min_effort") or MIN_EFFORT)
+    window_start = params.get("window_start") or min(dt.date.today(), params["start"])
+    pre_days = max(0, (params["start"] - window_start).days)
+    # the window has to stay big enough even if the cycle starts as late as
+    # `latest_start` (later than that the page simply reports it won't finish)
+    target_start = max(params.get("latest_start") or params["start"], params["start"])
     horizon = max(400, int(total_effort / min_effort / 0.67) + 200)
     for _ in range(6):
-        days = _calendar_window(params["start"], horizon, params["diaspora"])
-        if _fits(days, entries, min_effort, params["max_perakim"],
+        days = _calendar_window(window_start, pre_days + horizon, params["diaspora"])
+        if _fits(days[_first_index(days, target_start.isoformat()):],
+                 entries, min_effort, params["max_perakim"],
                  params["min_split_words"]):
             break
         horizon = int(horizon * 1.3) + 200
+    # latest date the start control may offer: still leaves room to finish
+    # even at the slowest pace
+    needed = _learning_days_needed(entries, min_effort, params["max_perakim"],
+                                   params["min_split_words"])
+    max_start = days[_latest_start_index(days, needed)][0]
     reasons, r_idx = [""], {"": 0}
     day_rows = []
     for iso, heb, reason in days:
@@ -696,7 +738,6 @@ def write_html(entries, params, out_path):
 
     budget = float(params["budget"])
     effort_max = int(max(3000, round(budget * 2.5 / 100) * 100))
-    start_pretty = f"{params['start']:%d %b %Y}"
     loc = "Diaspora (UK)" if params["diaspora"] else "Israel"
 
     data = (
@@ -753,6 +794,12 @@ def write_html(entries, params, out_path):
   .he { color:#444; font-size: 12px; }
   td[data-v] { font-variant-numeric: tabular-nums; }
   #stats.warn { color:#ffd97a; font-weight:600; opacity:1; }
+  /* narrow screens: let the table scroll sideways inside its own box instead
+     of stretching the whole page (the sticky header does not apply there) */
+  @media screen and (max-width: 1200px) {
+    .wrap { overflow-x: auto; }
+    thead th { position: static; }
+  }
   @media print {
     @page { size: A4 landscape; margin: 10mm; }
     body { background:#fff; }
@@ -777,10 +824,14 @@ def write_html(entries, params, out_path):
 <body>
 <header>
   <h1>Rambam Yad — Learning Schedule</h1>
-  <div class="sub">start @@START@@ · @@TOTAL_HAL@@ halachot / @@TOTAL_WORDS@@ words ·
+  <div class="sub">@@TOTAL_HAL@@ halachot / @@TOTAL_WORDS@@ words ·
     @@LOC@@ · <span id="stats"></span></div>
 </header>
 <div class="controls">
+  <label class="effort" title="First learning day. Shabbos, Yom Tov and fast days are skipped automatically.">
+    <span>Start</span>
+    <input type="date" id="startDate" min="@@MIN_START@@" max="@@MAX_START@@" value="@@START_ISO@@">
+  </label>
   <label class="effort" title="Effort = words × difficulty weight. Higher = more per day = fewer days.">
     <span>Effort/day</span>
     <input type="range" id="effort" min="@@MIN_EFFORT@@" max="@@EFFORT_MAX@@" step="10" value="@@DEFAULT@@">
@@ -821,6 +872,7 @@ def write_html(entries, params, out_path):
 /* ---- embedded data -------------------------------------------------- */
 @@DATA@@
 const DEFAULT_EFFORT = @@DEFAULT@@;
+const DEFAULT_START = '@@START_ISO@@';
 const MIN_SPLIT = @@MIN_SPLIT@@;
 const MAX_PERAKIM = @@MAX_PERAKIM@@;
 const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
@@ -836,6 +888,7 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
   const resetBtn = document.getElementById('reset');
   const effortRange = document.getElementById('effort');
   const effortNum = document.getElementById('effortNum');
+  const startDate = document.getElementById('startDate');
   const statsEl = document.getElementById('stats');
   const ths = Array.from(table.tHead.rows[0].cells);
   const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -859,6 +912,14 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     });
   }
   function sliceSum(a, from, to) { let s = 0; for (let i = from; i < to; i++) s += a[i]; return s; }
+  // first window day on/after `iso` (ISO date strings sort lexicographically)
+  function startIndex(iso) {
+    let lo = 0, hi = DAYS.length;
+    while (lo < hi) { const mid = (lo + hi) >> 1;
+      if (DAYS[mid][0] < iso) lo = mid + 1; else hi = mid; }
+    return lo;
+  }
+  function pickedStart() { return startDate.value || DEFAULT_START; }
   // Python-compatible rounding: round() ties to even, Math.round() ties up.
   function rint(x) {
     const f = Math.floor(x), frac = x - f;
@@ -877,13 +938,14 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
   }
 
   /* ---- the pacer (port of build_rows / Cursor.next_day) -------------- */
-  function buildSchedule(budget) {
+  function buildSchedule(budget, from) {
     const slack = Math.round(budget * 0.08);
     const rows = [];
     const seen = new Set();
     let i = 0, off = 0, dayNo = 0;
 
-    for (const day of DAYS) {
+    for (let di = from; di < DAYS.length; di++) {
+      const day = DAYS[di];
       const iso = day[0], heb = day[1], ri = day[2];
       if (ri !== 0) {                                  // yom tov / erev yom tov / tisha b'av
         rows.push({ type: 'skip', iso: iso, heb: heb, reason: REASONS[ri] });
@@ -937,7 +999,7 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
         effort: effort
       });
     }
-    return { rows: rows, complete: i >= PERAKIM.length, budget: budget };
+    return { rows: rows, complete: i >= PERAKIM.length, budget: budget, start: pickedStart() };
   }
 
   /* ---- rendering ---------------------------------------------------- */
@@ -973,12 +1035,14 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     if (n && res.complete) {
       const a = Date.parse(learn[0].iso + 'T00:00:00Z');
       const b = Date.parse(learn[n - 1].iso + 'T00:00:00Z');
-      txt += ' \u00b7 finish ' + prettyDate(learn[n - 1].iso) +
+      txt += ' \u00b7 start ' + prettyDate(learn[0].iso) +
+             ' \u00b7 finish ' + prettyDate(learn[n - 1].iso) +
              ' (' + ((b - a) / 31557600000).toFixed(1) + ' years)';
       statsEl.classList.remove('warn');
     } else {
       txt += ' \u00b7 still short of the finish when this file\u2019s calendar ends ' +
-             prettyDate(DAYS[DAYS.length - 1][0]) + ' (needs effort \u2265 @@MIN_EFFORT@@/day)';
+             prettyDate(DAYS[DAYS.length - 1][0]) + ' (choose an earlier start or '
+             + 'effort \u2265 @@MIN_EFFORT@@/day)';
       statsEl.classList.add('warn');
     }
     statsEl.textContent = txt + ' \u00b7 ~' + res.budget + ' effort/day';
@@ -986,7 +1050,8 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
 
   function rebuild() {
     const budget = parseFloat(effortNum.value) || DEFAULT_EFFORT;
-    const res = buildSchedule(budget);
+    const from = Math.min(startIndex(pickedStart()), DAYS.length - 1);
+    const res = buildSchedule(budget, from);
     current = res.rows;
     tbody.innerHTML = current.map(renderRow).join('');
     domRows = Array.from(tbody.rows);
@@ -1118,6 +1183,8 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
 
   effortRange.addEventListener('input', () => { effortNum.value = effortRange.value; scheduleRebuild(); });
   effortNum.addEventListener('input', scheduleRebuild);
+  startDate.addEventListener('input', scheduleRebuild);
+  startDate.addEventListener('change', scheduleRebuild);
   ths.forEach((th, i) => th.addEventListener('click', () => {
     if (sortCol === i) sortDir = -sortDir; else { sortCol = i; sortDir = 1; }
     sortRows(i);
@@ -1129,6 +1196,7 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
   resetBtn.addEventListener('click', () => {
     q.value = ''; seferSel.value = ''; typeSel.value = ''; hideSkips.checked = false;
     effortNum.value = DEFAULT_EFFORT; effortRange.value = DEFAULT_EFFORT;
+    startDate.value = DEFAULT_START;
     sortCol = -1; sortDir = 1;
     ths.forEach(th => { const a = th.querySelector('.arrow'); if (a) a.remove(); });
     rebuild();
@@ -1141,10 +1209,13 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
 </body>
 </html>"""
 
+    min_start = days[0][0]
     sefer_opts = "".join(f'<option value="{s[0]}">{s[0]}</option>' for s in sefarim)
     doc = (doc
            .replace("@@DATA@@", data)
-           .replace("@@START@@", start_pretty)
+           .replace("@@START_ISO@@", params["start"].isoformat())
+           .replace("@@MIN_START@@", min_start)
+           .replace("@@MAX_START@@", max_start)
            .replace("@@LOC@@", loc)
            .replace("@@SEFER_OPTS@@", sefer_opts)
            .replace("@@TOTAL_HAL@@", f"{total_hal:,}")
@@ -1157,7 +1228,7 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
 
     with open(out_path, "w", encoding="utf-8", newline="\n") as f:
         f.write(doc)
-    return horizon
+    return horizon, min_start, max_start
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -1184,6 +1255,13 @@ def main():
                     help=f"Slowest pace offered by the HTML effort control "
                          f"(default {MIN_EFFORT}; lowers the pace bound and "
                          f"enlarges the calendar window it embeds)")
+    ap.add_argument("--window-start", default=None,
+                    help="Earliest date offered by the HTML start-date control "
+                         "YYYY-MM-DD (default: today)")
+    ap.add_argument("--latest-start", default=None,
+                    help="Latest date offered by the HTML start-date control "
+                         "YYYY-MM-DD (default: as late as the slowest pace "
+                         "allows; bigger windows make a bigger HTML file)")
     ap.add_argument("--israel", action="store_true", help="Use Israel calendar (default: diaspora)")
     ap.add_argument("--outdir", default=os.path.join(HERE, "output"))
     ap.add_argument("--no-pdf", action="store_true")
@@ -1193,6 +1271,10 @@ def main():
     args = ap.parse_args()
 
     start = dt.date.fromisoformat(args.start)
+    window_start = (dt.date.fromisoformat(args.window_start) if args.window_start
+                    else min(dt.date.today(), start))
+    latest_start = (dt.date.fromisoformat(args.latest_start) if args.latest_start
+                    else start)
     diaspora = not args.israel
 
     weights = None if args.no_weights else load_weights(args.weights)
@@ -1213,7 +1295,8 @@ def main():
 
     params = {"start": start, "budget": budget, "slack": slack,
               "max_perakim": args.max_perakim, "min_split_words": args.min_split,
-              "diaspora": diaspora, "min_effort": args.min_effort}
+              "diaspora": diaspora, "min_effort": args.min_effort,
+              "window_start": window_start, "latest_start": latest_start}
 
     rows, completion = build_rows(entries, start, budget, slack,
                                   args.max_perakim, args.min_split, diaspora)
@@ -1237,8 +1320,9 @@ def main():
         print(f"Wrote {pp}")
     if not args.no_html:
         hp = os.path.join(args.outdir, stem + ".html")
-        horizon = write_html(entries, params, hp)
-        print(f"Wrote {hp}  (effort slider >= {args.min_effort:g}/day, "
+        horizon, min_start, max_start = write_html(entries, params, hp)
+        print(f"Wrote {hp}  (effort \u2265 {args.min_effort:g}/day, "
+              f"start {min_start}\u2013{max_start}, "
               f"calendar window {horizon} days)")
     if not args.no_ics:
         ip = os.path.join(args.outdir, stem + ".ics")

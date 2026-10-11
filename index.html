@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Rambam Yad \u2014 Learning Schedule</title>
+<title>Rambam Yad — Learning Schedule</title>
 <style>
   :root { --head:#1f4e79; --line:#cfd6dd; }
   * { box-sizing: border-box; }
@@ -30,28 +30,31 @@
 </head>
 <body>
 <header>
-  <h1>Rambam Yad \u2014 Learning Schedule</h1>
-  <div class="sub">A personalised Mishneh Torah cycle on a difficulty-weighted word budget \u00b7
-    start 12 Oct 2026 \u00b7 Diaspora (UK) calendar</div>
+  <h1>Rambam Yad — Learning Schedule</h1>
+  <div class="sub">A personalised Mishneh Torah cycle on a difficulty-weighted word budget ·
+    pick your own start date and pace in the browser · Diaspora (UK) calendar</div>
 </header>
 <main>
   <div class="card">
     <p style="margin:0 0 10px; font-size:14px;">
-      Each learning day costs roughly the same <strong>effort</strong> \u2014 words \u00d7 the
-      difficulty weight of the hilchot \u2014 so easy sefarim go faster (several perakim a day)
+      Each learning day costs roughly the same <strong>effort</strong> — words × the
+      difficulty weight of the hilchot — so easy sefarim go faster (several perakim a day)
       and hard ones slower (part of a perek). Shabbos, Erev Shabbos, Yom Tov, Erev Yom Tov and
       Tisha B'Av are off; Chol HaMoed, Chanukah, Purim and Rosh Chodesh are learning days.
     </p>
     <p style="margin:0; font-size:13px; color:#555;">
-      Open a schedule below and use the <strong>Effort/day</strong> control at the top to try any
-      pace \u2014 the whole table, the completion date and the .ics export update instantly.
+      Open a schedule below and set the <strong>Start</strong> date and the
+      <strong>Effort/day</strong> at the top — day numbers, dates, Hebrew dates, the completion
+      date and the .ics export all re-compute instantly, in the browser, with nothing to install.
+      Shabbosim and Yom Tov are skipped for you whatever day you start on.
     </p>
   </div>
 
   <div class="card">
-    <h2><a href="output/rambam_schedule.html">Interactive schedule \u2014 default pace</a></h2>
-    <div class="meta">~788 effort/day \u00b7 1,248 learning days \u00b7 finishes
-      Sunday, 2 November 2031 (5.1 years) \u00b7 the same pace as the old 15-halachot/day cycle</div>
+    <h2><a href="output/rambam_schedule.html">Interactive schedule — default pace</a></h2>
+    <div class="meta">Default pace ~788 effort/day · starting 12 Oct 2026 that is 1,248 learning
+      days, finishing Sunday, 2 November 2031 (5.1 years) — the same raw pace as the old
+      15-halachot/day cycle. Change the start or the effort once it is open.</div>
     <div class="links">
       <a class="primary" href="output/rambam_schedule.html">Open interactive table</a>
       <a href="output/rambam_schedule.xlsx">XLSX</a>
@@ -61,9 +64,9 @@
   </div>
 
   <div class="card">
-    <h2><a href="output/rambam_schedule_b1000.html">Interactive schedule \u2014 faster pace</a></h2>
-    <div class="meta">1,000 effort/day \u00b7 973 learning days \u00b7 finishes
-      Thursday, 12 September 2030 (3.9 years)</div>
+    <h2><a href="output/rambam_schedule_b1000.html">Interactive schedule — faster pace</a></h2>
+    <div class="meta">Faster example: 1,000 effort/day, 973 learning days, starting 12 Oct 2026 it
+      finishes Thursday, 12 September 2030 (3.9 years)</div>
     <div class="links">
       <a class="primary" href="output/rambam_schedule_b1000.html">Open interactive table</a>
       <a href="output/rambam_schedule_b1000.xlsx">XLSX</a>
@@ -75,22 +78,23 @@
   <div class="card">
     <h2>How it works</h2>
     <ul class="notes">
-      <li><strong>Effort</strong> = word count \u00d7 difficulty weight
-        (<code>data/weights.csv</code> \u2014 0.5 for read-throughs up to 1.5 for Shabbat, Ishut,
+      <li><strong>Effort</strong> = word count × difficulty weight
+        (<code>data/weights.csv</code> — 0.5 for read-throughs up to 1.5 for Shabbat, Ishut,
         Nizkei Mamon and friends). Edit it to taste.</li>
       <li>Short/easy perakim are combined; long/hard ones are split at halacha boundaries;
         a single halacha never gets split.</li>
       <li>The interactive tables carry the perek/word/weight data and enough Hebrew calendar to
-        re-pace themselves offline \u2014 they are one self-contained file each, no dependencies.</li>
+        re-pace themselves offline — they are one self-contained file each, no dependencies. The
+        embedded calendar covers start dates from 11 Oct 2026 to 12 Feb 2030.</li>
       <li>In a schedule page use <strong>Export .ics</strong> for the pace you are looking at, or
         press <strong>Ctrl/Cmd+P</strong> for a landscape printout.</li>
-      <li>Everything is regenerated with <code>python generate_schedule.py</code> \u2014
+      <li>Everything is regenerated with <code>python generate_schedule.py</code> —
         see the README for flags (<code>--budget</code>, <code>--start</code>, <code>--israel</code>,
-        <code>--no-weights</code>, \u2026).</li>
+        <code>--no-weights</code>, …).</li>
     </ul>
   </div>
 </main>
 <footer>Generated from the <a href="https://github.com/shmuli9/rambam-schedule">rambam-schedule</a>
-  repository \u00b7 word counts from <a href="https://www.sefaria.org">Sefaria</a></footer>
+  repository · word counts from <a href="https://www.sefaria.org">Sefaria</a></footer>
 </body>
 </html>
