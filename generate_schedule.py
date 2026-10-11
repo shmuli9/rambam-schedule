@@ -35,6 +35,7 @@ from hdate.holidays import HolidayTypes
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(HERE, "data", "rambam.json")
 WEIGHTS_FILE = os.path.join(HERE, "data", "weights.csv")
+SPLITS_FILE = os.path.join(HERE, "data", "halacha_splits.json")
 
 # Baseline: the old "15 halachot/day" model completed the Yad in 995 learning
 # days. Auto budget keeps the same raw (unweighted) word throughput.
@@ -58,11 +59,39 @@ def load_weights(path):
     return weights
 
 
-def load_entries(data_file=DATA_FILE, weights=None):
-    """Flatten rambam.json into an ordered list of perek entries."""
+def load_splits(path=SPLITS_FILE):
+    """slug -> {perek -> {halacha -> [parts]}} from data/halacha_splits.json.
+
+    Each part is {"label": str, "words": int}; they must add up to the
+    halacha's word count in rambam.json (checked in load_entries).
+    """
+    if not path or not os.path.exists(path):
+        return {}
+    with open(path, encoding="utf-8") as f:
+        blob = json.load(f)
+    out = {}
+    for slug, perakim in blob.get("hilchot", {}).items():
+        for perek, halachot in perakim.items():
+            for halacha, spec in halachot.items():
+                parts = spec.get("parts") if isinstance(spec, dict) else None
+                if not parts:
+                    continue
+                out.setdefault(slug, {}).setdefault(int(perek), {})[int(halacha)] = spec
+    return out
+
+
+def load_entries(data_file=DATA_FILE, weights=None, splits=None):
+    """Flatten rambam.json into an ordered list of perek entries.
+
+    The atomic unit a day can stop at is normally one halacha, but an
+    oversized halacha may be pre-split into parts (see load_splits); either
+    way every entry exposes a parallel `units` list describing what each
+    element of `halacha_words` actually is.
+    """
     with open(data_file, encoding="utf-8") as f:
         data = json.load(f)
     weights = weights or {}
+    splits = splits if splits is not None else load_splits()
     entries = []
     for sefer in data["sefarim"]:
         for hil in sefer["hilchot"]:
@@ -77,7 +106,24 @@ def load_entries(data_file=DATA_FILE, weights=None):
                 sys.exit(f"ERROR: no word counts for {hil['slug']}. "
                          f"Re-run: python fetch_data.py")
             wgt, rationale = weights.get(hil["slug"], (1.0, ""))
+            hil_splits = splits.get(hil["slug"], {})
             for i, n in enumerate(counts, start=1):
+                unit_words, units = [], []
+                for h_no, h_words in enumerate(words[i - 1], start=1):
+                    spec = hil_splits.get(i, {}).get(h_no) or {}
+                    parts = spec.get("parts") if isinstance(spec, dict) else spec
+                    if parts:
+                        if sum(p["words"] for p in parts) != h_words:
+                            sys.exit(f"ERROR: split of {hil['slug']} {i}:{h_no} "
+                                     f"adds up to {sum(p['words'] for p in parts)} "
+                                     f"words, expected {h_words}")
+                        for p_no, p in enumerate(parts, start=1):
+                            unit_words.append(p["words"])
+                            units.append({"halacha": h_no, "part": p_no,
+                                          "n_parts": len(parts), "label": p.get("label", "")})
+                    else:
+                        unit_words.append(h_words)
+                        units.append({"halacha": h_no, "part": None})
                 entries.append({
                     "sefer_en": sefer["name_en"],
                     "sefer_he": sefer["name_he"] or "",
@@ -85,7 +131,8 @@ def load_entries(data_file=DATA_FILE, weights=None):
                     "hil_he": hil_he,
                     "perek": i,
                     "n_halachot": n,
-                    "halacha_words": words[i - 1],
+                    "halacha_words": unit_words,
+                    "units": units,
                     "weight": wgt,
                     "unit": unit,
                 })
@@ -210,26 +257,60 @@ def item_words(e, a, b):
     return sum(e["halacha_words"][a - 1:b])
 
 
+def n_units(e):
+    """Number of atomic units in this perek (may exceed the halacha count
+    when a long halacha has been pre-split into parts)."""
+    return len(e["halacha_words"])
+
+
+def units_of(e):
+    return e.get("units") or [{"halacha": i + 1, "part": None}
+                              for i in range(n_units(e))]
+
+
+def item_halachot(e, a, b):
+    """Halachot touched: parts of a split halacha count once each group."""
+    return len({u["halacha"] for u in units_of(e)[a - 1:b]})
+
+
+def item_span(e, a, b):
+    """Human-readable description of units a\u2013b (1-based inclusive)."""
+    units = units_of(e)[a - 1:b]
+    split = [u for u in units if u["part"]]
+    if len({u["halacha"] for u in units}) == 1 and units[0]["part"]:
+        u0, u1 = units[0], units[-1]
+        if u0["part"] == u1["part"]:
+            return (f"halakha {u0['halacha']}, part {u0['part']} of {u0['n_parts']} "
+                    f"({u0['label']})")
+        return (f"halakha {u0['halacha']}, parts {u0['part']}\u2013{u1['part']} "
+                f"of {u0['n_parts']} ({u0['label']} \u2026)")
+    word = e.get("unit", "halachot")
+    lo, hi = units[0]["halacha"], units[-1]["halacha"]
+    rng = str(lo) if lo == hi else f"{lo}\u2013{hi}"
+    tail = ""
+    if split and len(split) != len(units):
+        tail = " (incl. " + ", ".join(f"{u['halacha']}.{u['part']}" for u in split) + ")"
+    return f"{word} {rng} of {e['n_halachot']}" + tail
+
+
 def item_label(e, a, b):
     w = item_words(e, a, b)
     unit = e.get("unit", "halachot")
-    whole = (a == 1 and b == e["n_halachot"])
+    whole = (a == 1 and b == n_units(e))
     if whole:
         return (f"{e['hil_en']} {e['perek']} "
                 f"(whole perek, {e['n_halachot']} {unit}, {w} words)")
-    return (f"{e['hil_en']} {e['perek']} "
-            f"({unit} {a}\u2013{b} of {e['n_halachot']}, {w} words)")
+    return f"{e['hil_en']} {e['perek']} ({item_span(e, a, b)}, {w} words)"
 
 
 def item_label_short(e, a, b):
     """Compact label used in the PDF."""
-    unit = e.get("unit", "halachot")
-    whole = (a == 1 and b == e["n_halachot"])
+    whole = (a == 1 and b == n_units(e))
     if whole:
         return (f"Perek {e['perek']} (whole, {e['n_halachot']} hal., "
                 f"{item_words(e, a, b)} w)")
-    return (f"Perek {e['perek']}: {unit} {a}\u2013{b} of "
-            f"{e['n_halachot']} ({item_words(e, a, b)} w)")
+    return (f"Perek {e['perek']}: {item_span(e, a, b)} "
+            f"({item_words(e, a, b)} w)")
 
 
 # ---------------------------------------------------------------------------
@@ -256,7 +337,7 @@ def build_rows(entries, start, budget, slack, max_perakim=5,
                 "weekday": d.strftime("%a"),
                 "hebrew_date": hebrew_date,
                 "items": items,
-                "halachot": sum(b - a + 1 for _, a, b in items),
+                "halachot": sum(item_halachot(e, a, b) for e, a, b in items),
                 "words": sum(item_words(e, a, b) for e, a, b in items),
                 "effort": effort,
             })
@@ -548,8 +629,19 @@ def event_for_row(row):
     """(summary, description) for a learning-day ICS event."""
     parts = []
     for e, a, b in row["items"]:
-        whole = (a == 1 and b == e["n_halachot"])
-        parts.append(f"{e['hil_en']} {e['perek']}" + ("" if whole else f" ({a}\u2013{b})"))
+        whole = (a == 1 and b == n_units(e))
+        units = units_of(e)[a - 1:b]
+        if whole:
+            suffix = ""
+        elif all(u["part"] is None for u in units):
+            lo, hi = units[0]["halacha"], units[-1]["halacha"]
+            suffix = (f" ({lo}\u2013{hi})") if lo != hi else (f" ({lo})")
+        else:
+            u0, u1 = units[0], units[-1]
+            pr = (f"{u0['part']}\u2013{u1['part']}" if u1["part"] != u0["part"]
+                  else str(u0["part"]))
+            suffix = f" ({u0['halacha']}.{pr})"
+        parts.append(f"{e['hil_en']} {e['perek']}" + suffix)
     summary = f"Rambam #{row['day_no']}: " + "; ".join(parts)
     sefer = ", ".join(dict.fromkeys(e["sefer_en"] for e, _, _ in row["items"]))
     desc = "\n".join(
@@ -680,7 +772,11 @@ def write_html(entries, params, out_path):
     # ---- compact payload ---------------------------------------------
     #   SEFARIM  [[en, he]]
     #   HILCHOT  [[sefer_idx, en, he, unit]]
-    #   PERAKIM  [[hilchot_idx, perek, "w1,w2,\u2026", weight]]
+    #   PERAKIM  [[hilchot_idx, perek, "w1,w2,\u2026", weight, n_halachot,
+    #              units?]]
+    #            units is 0 (every unit is a plain halacha) or an array
+    #            parallel to the words: [halacha, part, n_parts, label]
+    #            describing pre-split halachot (data/halacha_splits.json)
     #   DAYS     [[iso, hebrew_date, reason_idx]]   (reason 0 = learning day)
     sefarim, sef_idx = [], {}
     hilchot, hil_idx = [], {}
@@ -694,9 +790,17 @@ def write_html(entries, params, out_path):
         if hkey not in hil_idx:
             hil_idx[hkey] = len(hilchot)
             hilchot.append(list(hkey))
-        perakim.append([hil_idx[hkey], e["perek"],
-                        ",".join(str(w) for w in e["halacha_words"]),
-                        e["weight"]])
+        rec = [hil_idx[hkey], e["perek"],
+               ",".join(str(w) for w in e["halacha_words"]),
+               e["weight"]]
+        rec.append(e["n_halachot"])
+        units = units_of(e)
+        if any(u["part"] for u in units):
+            rec.append([[u["halacha"], u["part"] or 0, u.get("n_parts") or 0,
+                         u.get("label") or ""] for u in units])
+        else:
+            rec.append(0)
+        perakim.append(rec)
 
     total_hal = sum(e["n_halachot"] for e in entries)
     total_words = sum(sum(e["halacha_words"]) for e in entries)
@@ -781,6 +885,15 @@ def write_html(entries, params, out_path):
   .controls button.primary { background: var(--head); color:#fff; border-color: var(--head); }
   .controls button.primary:hover { background:#163a5c; }
   .wrap { padding: 0 20px 30px; }
+  .panel { background:#fff; border-bottom:1px solid #ddd; padding: 10px 20px 8px; }
+  .panel-head { display:flex; flex-wrap:wrap; align-items:baseline; gap:10px;
+                font-size:13px; margin-bottom:4px; }
+  .panel-head strong { font-size:13px; }
+  .panel-head .muted { color:#555; }
+  .panel-head button { margin-left:auto; padding:4px 8px; border:1px solid #bbb;
+                border-radius:4px; background:#fff; cursor:pointer; font-size:12px; }
+  #distChart svg { display:block; width:100%; height:auto; }
+  .panel.collapsed #distChart { display:none; }
   table { border-collapse: collapse; width:100%; background:#fff; font-size: 13px; }
   th, td { border: 1px solid #cfd6dd; padding: 5px 8px; vertical-align: top; text-align: left; }
   thead th { background: var(--head); color:#fff; cursor:pointer; user-select:none;
@@ -803,7 +916,7 @@ def write_html(entries, params, out_path):
   @media print {
     @page { size: A4 landscape; margin: 10mm; }
     body { background:#fff; }
-    .controls, header .sub button { display: none !important; }
+    .controls, .panel, header .sub button { display: none !important; }
     header { background:#fff; color:#000; padding: 0 0 4px; }
     header .sub { color:#444; }
     #stats.warn { color:#7a3b00; }
@@ -849,6 +962,14 @@ def write_html(entries, params, out_path):
   <button id="ics" class="primary" title="Download an .ics file of the current pace — import into Apple Calendar, Gmail, Outlook, etc.">📅 Export .ics</button>
   <span class="count" id="count"></span>
 </div>
+<div class="panel" id="distPanel">
+  <div class="panel-head">
+    <strong>Distribution of actual effort per day</strong>
+    <span class="muted" id="distStats"></span>
+    <button id="distToggle">Hide</button>
+  </div>
+  <div id="distChart"></div>
+</div>
 <div class="wrap">
 <table id="sched">
   <thead><tr>
@@ -890,6 +1011,10 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
   const effortNum = document.getElementById('effortNum');
   const startDate = document.getElementById('startDate');
   const statsEl = document.getElementById('stats');
+  const chartEl = document.getElementById('distChart');
+  const stats2El = document.getElementById('distStats');
+  const distPanel = document.getElementById('distPanel');
+  const distToggle = document.getElementById('distToggle');
   const ths = Array.from(table.tHead.rows[0].cells);
   const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -928,13 +1053,45 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     return (f % 2 === 0) ? f : f + 1;
   }
 
+  // a perek's words are already split into atomic units (a halacha, or a
+  // part of a pre-split long halacha); p[5] describes them when needed
+  function unit(p, i) {
+    return p[5] ? { halacha: p[5][i - 1][0], part: p[5][i - 1][1] || null,
+                    n_parts: p[5][i - 1][2] || 0, label: p[5][i - 1][3] || '' }
+                : { halacha: i, part: null, n_parts: 0, label: '' };
+  }
+  function halachaCount(p) { return p[4]; }
+
+  function spanText(p, a, b) {
+    const word = HILCHOT[p[0]][3];
+    const u0 = unit(p, a), u1 = unit(p, b);
+    const splitUnits = [];
+    for (let i = a; i <= b; i++) if (unit(p, i).part) splitUnits.push(i);
+    if (!splitUnits.length) {
+      const rng = u0.halacha === u1.halacha ? String(u0.halacha)
+                                            : u0.halacha + '\u2013' + u1.halacha;
+      return word + ' ' + rng + ' of ' + halachaCount(p);
+    }
+    if (u0.halacha === u1.halacha && u0.part && u1.part) {
+      return u0.part === u1.part
+        ? 'halakha ' + u0.halacha + ', part ' + u0.part + ' of ' + u0.n_parts +
+          ' (' + u0.label + ')'
+        : 'halakha ' + u0.halacha + ', parts ' + u0.part + '\u2013' + u1.part + ' of ' +
+          u0.n_parts + ' (' + u0.label + ' \u2026)';
+    }
+    const tail = ' (incl. ' + splitUnits.map(i => {
+      const u = unit(p, i); return u.halacha + '.' + u.part;
+    }).join(', ') + ')';
+    return word + ' ' + u0.halacha + '\u2013' + u1.halacha + ' of ' + halachaCount(p) + tail;
+  }
+
   function itemLabel(p, w, a, b) {
     const h = HILCHOT[p[0]], unit = h[3], n = w.length;
     const words = sliceSum(w, a - 1, b);
     const whole = (a === 1 && b === n);
-    return whole ? h[1] + ' ' + p[1] + ' (whole perek, ' + n + ' ' + unit + ', ' + words + ' words)'
-                 : h[1] + ' ' + p[1] + ' (' + unit + ' ' + a + '\u2013' + b +
-                   ' of ' + n + ', ' + words + ' words)';
+    return whole ? h[1] + ' ' + p[1] + ' (whole perek, ' + halachaCount(p) + ' ' + unit +
+                   ', ' + words + ' words)'
+                 : h[1] + ' ' + p[1] + ' (' + spanText(p, a, b) + ', ' + words + ' words)';
   }
 
   /* ---- the pacer (port of build_rows / Cursor.next_day) -------------- */
@@ -994,12 +1151,134 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
         weightStr: weights.map(fmtW).join(' / '),
         weightAvg: weights.reduce((x, y) => x + y, 0) / weights.length,
         newSefer: newNames.length ? '\u2192 New sefer: ' + newNames.join(', ') : '',
-        halachot: items.reduce((s, it) => s + it.b - it.a + 1, 0),
+        halachot: items.reduce((s, it) => {
+          const hs = new Set();
+          for (let i = it.a; i <= it.b; i++) hs.add(unit(PERAKIM[it.p], i).halacha);
+          return s + hs.size;
+        }, 0),
         words: items.reduce((s, it) => s + sliceSum(PWORD[it.p], it.a - 1, it.b), 0),
         effort: effort
       });
     }
     return { rows: rows, complete: i >= PERAKIM.length, budget: budget, start: pickedStart() };
+  }
+
+  /* ---- effort distribution (histogram + normal fit) ----------------- */
+  function renderDist(learnRows, budget) {
+    const vals = learnRows.map(r => r.effort);
+    const n = vals.length;
+    if (n < 2) { chartEl.innerHTML = ''; stats2El.textContent = ''; return; }
+
+    const mean = vals.reduce((a, b) => a + b, 0) / n;
+    const sorted = vals.slice().sort((a, b) => a - b);
+    const med = (n % 2) ? sorted[(n - 1) / 2]
+                        : (sorted[n / 2 - 1] + sorted[n / 2]) / 2;
+    const q = frac => sorted[Math.round(frac * (n - 1))];
+    // A handful of days are one enormous halacha (the nusach in Seder Tefillot,
+    // Tefillin 8, …) and a few are the tail end of a split perek. Frame the
+    // chart on the 2nd–98th percentile so the bulk is legible; anything
+    // outside collects in the olive end bins.
+    let lo = Math.max(1, Math.min(q(0.02), budget * 0.8, med * 0.9));
+    let hi = Math.max(q(0.98), budget * 1.15, med * 1.1);
+    if (hi - lo < 1) hi = lo + 1;
+    const outside = vals.filter(v => v < lo || v > hi).length;
+    const bins = 32, bw = (hi - lo) / bins;
+    const counts = new Array(bins).fill(0);
+    for (const v of vals) {
+      let k = Math.floor((v - lo) / bw);
+      if (k < 0) k = 0;
+      if (k >= bins) k = bins - 1;
+      counts[k]++;
+    }
+    // Gaussian-kernel smoothing (bandwidth = ~one bin): the curve follows
+    // whatever shape the bulk has rather than assuming normality
+    const hStep = bw * 1.1;
+    const K = u => Math.exp(-(u * u) / 2) / Math.sqrt(2 * Math.PI);
+    const src = vals.filter(v => v >= lo - 3 * hStep && v <= hi + 3 * hStep);
+    const fit = [];
+    for (let i = 0; i <= 140; i++) {
+      const x = lo + (hi - lo) * i / 140;
+      let s = 0;
+      for (const v of src) s += K((x - v) / hStep);
+      fit.push([x, s * (bw / hStep)]);
+    }
+    const yMax = Math.max(Math.max.apply(null, counts),
+                         Math.max.apply(null, fit.map(p => p[1]))) * 1.15 || 1;
+
+    const W = 920, H = 210, L = 46, R = 14, T = 12, B = 26;
+    const pw = W - L - R, ph = H - T - B;
+    const xp = v => L + (v - lo) / (hi - lo) * pw;
+    const yp = c => T + ph - Math.min(c / yMax, 1.05) * ph;
+    const f = x => (Math.round(x * 10) / 10);
+
+    let axis = '';
+    for (let i = 0; i <= 6; i++) {
+      const v = lo + (hi - lo) * i / 6;
+      axis += '<line x1="' + f(xp(v)) + '" y1="' + (H - B) + '" x2="' + f(xp(v)) + '" y2="' + (H - B + 4) +
+              '" stroke="#999"/>' +
+              '<text x="' + f(xp(v)) + '" y="' + (H - B + 15) + '" font-size="10" fill="#666" ' +
+              'text-anchor="middle">' + Math.round(v) + '</text>';
+    }
+    for (let i = 0; i <= 2; i++) {
+      const c = yMax * i / 2, y = f(yp(c));
+      axis += '<line x1="' + L + '" y1="' + y + '" x2="' + (W - R) + '" y2="' + y + '" stroke="#e3e7ea"/>' +
+              '<text x="' + (L - 6) + '" y="' + (y + 3) + '" font-size="10" fill="#666" ' +
+              'text-anchor="end">' + Math.round(c) + '</text>';
+    }
+    const baseline = '<line x1="' + L + '" y1="' + (H - B) + '" x2="' + (W - R) + '" y2="' + (H - B) +
+                     '" stroke="#999"/>';
+
+    const last = bins - 1;
+    const bars = counts.map((c, i) => {
+      if (!c) return '';
+      const x0 = xp(lo + i * bw), x1 = xp(lo + (i + 1) * bw);
+      const y = yp(c), h = Math.max(1, (H - B) - y);
+      const edge = (i === 0 || i === last);
+      const label = i === 0
+        ? 'effort \u2264 ' + Math.round(lo + bw) + ': ' + c.toLocaleString() + ' days'
+        : i === last
+          ? 'effort \u2265 ' + Math.round(lo + i * bw) + ': ' + c.toLocaleString() + ' days'
+          : 'effort ' + Math.round(lo + i * bw) + '\u2013' + Math.round(lo + (i + 1) * bw) +
+            ': ' + c.toLocaleString() + ' days';
+      return '<rect data-c="' + c + '" x="' + f(x0) + '" y="' + f(y) + '" width="' +
+             f(Math.max(0.6, x1 - x0 - 1)) +
+             '" height="' + f(h) + '" fill="' + (edge ? '#c8b06a' : '#7fa8d0') +
+             '" fill-opacity="0.85">' + '<title>' + label + '</title></rect>';
+    }).join('');
+
+    const curve = '<path d="M' + fit.map(p => f(xp(p[0])) + ' ' + f(yp(p[1]))).join(' L') +
+                  '" fill="none" stroke="#b0402f" stroke-width="1.6"/>';
+    const marks =
+      '<line x1="' + f(xp(mean)) + '" y1="' + T + '" x2="' + f(xp(mean)) + '" y2="' + (H - B) +
+      '" stroke="#1f4e79" stroke-width="1.2"/>' +
+      '<text x="' + f(xp(mean) + 4) + '" y="' + (T + 10) + '" font-size="10" fill="#1f4e79">mean ' +
+      Math.round(mean) + '</text>' +
+      '<line x1="' + f(xp(budget)) + '" y1="' + T + '" x2="' + f(xp(budget)) + '" y2="' + (H - B) +
+      '" stroke="#b0402f" stroke-width="1.2" stroke-dasharray="4 3"/>' +
+      '<text x="' + f(xp(budget) + 4) + '" y="' + (T + 22) + '" font-size="10" fill="#b0402f">budget ' +
+      Math.round(budget) + '</text>' +
+      '<text x="' + L + '" y="' + (T + 10) + '" font-size="10" fill="#777">days per bin</text>' +
+      (outside ? '<text x="' + (W - R) + '" y="' + (T + 10) + '" font-size="10" fill="#8a742c" ' +
+                  'text-anchor="end">olive bins collect ' + outside.toLocaleString() +
+                  ' days outside ' + Math.round(lo) + '\u2013' + Math.round(hi) +
+                  ' (true range ' + Math.round(sorted[0]) + '\u2013' +
+                  Math.round(sorted[n - 1]).toLocaleString() + ')</text>' : '');
+
+    chartEl.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" ' +
+      'aria-label="Histogram of per-day effort with a fitted normal curve">' +
+      baseline + axis + bars + curve + marks + '</svg>';
+
+    const within = vals.filter(v => Math.abs(v - budget) <= 0.1 * budget).length / n;
+    const over = vals.filter(v => v > budget * 1.08).length;
+    const veryShort = vals.filter(v => v < budget * 0.5).length;
+    stats2El.textContent =
+      n.toLocaleString() + ' days \u00b7 mean ' + Math.round(mean) +
+      ' (' + Math.round(mean / budget * 100) + '% of budget) \u00b7 median ' + Math.round(med) +
+      ' \u00b7 IQR ' + Math.round(q(0.25)) + '\u2013' + Math.round(q(0.75)) +
+      ' \u00b7 ' + Math.round(within * 100) + '% within \u00b110% \u00b7 ' +
+      over.toLocaleString() + ' overshoot days' +
+      (veryShort ? ' \u00b7 ' + veryShort.toLocaleString() + ' very short days' : '') +
+      ' \u00b7 range ' + Math.round(sorted[0]) + '\u2013' + Math.round(sorted[n - 1]).toLocaleString();
   }
 
   /* ---- rendering ---------------------------------------------------- */
@@ -1058,6 +1337,7 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     if (sortCol >= 0) sortRows(sortCol);
     apply();
     updateStats(res);
+    renderDist(res.rows.filter(r => r.type === 'learn'), budget);
   }
 
   /* ---- filtering + sorting ------------------------------------------ */
@@ -1126,8 +1406,16 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     return current.filter(r => r.type === 'learn').map(r => {
       const parts = r.items.map(it => {
         const p = PERAKIM[it.p], w = PWORD[it.p];
-        return HILCHOT[p[0]][1] + ' ' + p[1] +
-               ((it.a === 1 && it.b === w.length) ? '' : ' (' + it.a + '\u2013' + it.b + ')');
+        if (it.a === 1 && it.b === w.length) return HILCHOT[p[0]][1] + ' ' + p[1];
+        const u0 = unit(p, it.a), u1 = unit(p, it.b);
+        const hasParts = !p[5] ? false : (u0.part || u1.part);
+        if (!hasParts) {
+          return HILCHOT[p[0]][1] + ' ' + p[1] +
+                 (u0.halacha === u1.halacha ? ' (' + u0.halacha + ')'
+                                            : ' (' + u0.halacha + '\u2013' + u1.halacha + ')');
+        }
+        const pr = (u1.part && u1.part !== u0.part) ? u0.part + '\u2013' + u1.part : String(u0.part);
+        return HILCHOT[p[0]][1] + ' ' + p[1] + ' (' + u0.halacha + '.' + pr + ')';
       });
       const summary = 'Rambam #' + r.dayNo + ': ' + parts.join('; ');
       const desc = [
@@ -1202,6 +1490,10 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     rebuild();
   });
   document.getElementById('ics').addEventListener('click', exportIcs);
+  distToggle.addEventListener('click', () => {
+    const collapsed = distPanel.classList.toggle('collapsed');
+    distToggle.textContent = collapsed ? 'Show' : 'Hide';
+  });
 
   rebuild();
 })();
@@ -1251,6 +1543,11 @@ def main():
                     help="CSV with slug,weight columns (default: data/weights.csv)")
     ap.add_argument("--no-weights", action="store_true",
                     help="Ignore weights file (all hilchot weight 1.0)")
+    ap.add_argument("--splits", default=SPLITS_FILE,
+                    help="JSON break points for oversized single halachot "
+                         "(default: data/halacha_splits.json)")
+    ap.add_argument("--no-splits", action="store_true",
+                    help="Ignore the splits file: never break inside a halacha")
     ap.add_argument("--min-effort", type=float, default=MIN_EFFORT,
                     help=f"Slowest pace offered by the HTML effort control "
                          f"(default {MIN_EFFORT}; lowers the pace bound and "
@@ -1278,7 +1575,14 @@ def main():
     diaspora = not args.israel
 
     weights = None if args.no_weights else load_weights(args.weights)
-    entries = load_entries(weights=weights)
+    splits = None if args.no_splits else load_splits(args.splits)
+    if splits:
+        specs = [spec for part_splits in splits.values()
+                 for h in part_splits.values() for spec in h.values()]
+        print(f"Halacha splits: {len(specs)} oversized halachot pre-split into "
+              f"{sum(len(s['parts']) for s in specs)} parts"
+              f" ({', '.join(sorted(set(s['strategy'] for s in specs)))})")
+    entries = load_entries(weights=weights, splits=splits)
     total_hal = sum(e["n_halachot"] for e in entries)
     total_words = sum(sum(e["halacha_words"]) for e in entries)
     total_effort = sum(sum(e["halacha_words"]) * e["weight"] for e in entries)

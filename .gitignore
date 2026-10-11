@@ -8,5 +8,8 @@ venv/
 .DS_Store
 *.swp
 
+# Sefaria text fetched while planning halacha splits (regenerate anytime)
+data/_sefaria_text_cache.json
+
 # local scratch copies of generated output
 output/*_copy.*

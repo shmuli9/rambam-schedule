@@ -1,0 +1,69 @@
+{
+ "_comment": "Break points inside oversized single halachot, derived from the Sefaria text by plan_splits.py. The words of each halakha's parts must add up to its count in data/rambam.json.",
+ "hilchot": {
+  "Mishneh_Torah,_Tefillin,_Mezuzah_and_the_Torah_Scroll": {
+   "8": {
+    "4": {
+     "strategy": "headings",
+     "source": "Sefaria <b> headings inside the halakha",
+     "parts": [
+      {
+       "label": "intro + Sefer Bereishit",
+       "words": 369
+      },
+      {
+       "label": "Sefer Shemot",
+       "words": 657
+      },
+      {
+       "label": "Sefer Vayikra",
+       "words": 382
+      },
+      {
+       "label": "Sefer Bamidbar",
+       "words": 507
+      },
+      {
+       "label": "Sefer Devarim",
+       "words": 523
+      },
+      {
+       "label": "layout of Shirat Ha'azinu",
+       "words": 183
+      },
+      {
+       "label": "Shirat HaYam, Shirat 'Az Yashir' layout + closing rules",
+       "words": 282
+      }
+     ]
+    }
+   }
+  },
+  "Mishneh_Torah,_The_Sanhedrin_and_the_Penalties_within_Their_Jurisdiction": {
+   "19": {
+    "4": {
+     "strategy": "list",
+     "source": "enumerated list (168 items) split into 4 even parts at item boundaries",
+     "parts": [
+      {
+       "label": "items 1–49",
+       "words": 235
+      },
+      {
+       "label": "items 50–84",
+       "words": 235
+      },
+      {
+       "label": "items 85–127",
+       "words": 236
+      },
+      {
+       "label": "items 128–168",
+       "words": 238
+      }
+     ]
+    }
+   }
+  }
+ }
+}
