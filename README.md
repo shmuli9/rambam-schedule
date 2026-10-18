@@ -71,15 +71,16 @@ own 768k**, i.e. ~19 commentary words per word of Rambam.
 
 Two other sources were evaluated and rejected:
 
-- **HebrewBooks** has the best *catalogue* but serves commentary through a JS
-  overlay: `rambam.aspx?…&text=1` answers plain HTTP with "Invalid Request", so
-  it is not scrapable.
+- **HebrewBooks** has the best *catalogue* but is not scrapable: it serves
+  commentary through a JS overlay, and plain HTTP now gets a Cloudflare
+  challenge (HTTP 403).
 - **he.wikisource.org** does publish clean wikitext (`ws_discover.py` measures
   it: 8 commentators, כסף משנה nearly complete, מגיד משנה only 19 hilchot), but
   the transcriptions are partial. Sefaria's text is strictly larger on every
   hilchot we compared — Maggid Mishneh on Shabbat is 79,980 words on Sefaria vs
   13,983 on Wikisource, on Gerushin 42,066 vs 3,569 — so Wikisource adds
-  nothing and Sefaria is the sole source.
+  nothing and Sefaria is the sole source. What was fetched, what is complete
+  and where to continue is recorded in `data/SOURCES.md`.
 
 The proxy for a hilchot is its **commentary density** — total commentary words
 divided by the Rambam's own word count (so long Rambam halachot don't look hard
