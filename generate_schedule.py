@@ -59,6 +59,161 @@ def load_weights(path):
     return weights
 
 
+def compute_proxy_weights(commentary_path, hand_weights, alpha=0.5, coverage_min=0.25,
+                          min_commentators=3, effort_neutral=True):
+    """Blend the hand-tuned weights with a commentary-density difficulty proxy.
+
+    The proxy for a hilchot is its *commentary density* -- total words written
+    on it by a basket of Rambam meforshim, divided by the Rambam's own word
+    count.  Each meforshim is first normalised to its own geometric mean so a
+    verbose commentator (e.g. Tzafnat Pa'neach) cannot dominate and a missing
+    one merely drops out; the per-hilchot averages are then normalised so the
+    proxy has geometric mean 1.0 (a clean effort multiplier).
+
+    Per-author normalisation is what makes the basket robust to *uneven
+    coverage*: commentators do not all write on the same hilchot (Kessef Mishneh
+    covers 82, the Radbaz 3), so a hilchot is scored only by those who actually
+    wrote on it, each measured against their own average.  A hilchot nobody
+    commented on scores as average rather than as easy.
+
+    Two gates decide whether a hilchot may use the proxy at all:
+      * min_commentators -- with only one or two voices the density estimate is
+        noise, so fall back to the hand weight;
+      * coverage_min -- fraction of attempted nodes that returned usable text
+        (a data-quality check on the fetch, not on the hilchot).
+
+    composite = hand^(1-alpha) * proxy^alpha.  Hilchot failing either gate (and
+    those with no commentary data at all -- the Introduction, the Order of
+    Prayer) keep their hand weight, so sparse digitisation never drags a sugya
+    toward "easy".
+
+    With effort_neutral=True (default) the blended weights are rescaled so the
+    TOTAL weighted words equal the hand-only total -- the proxy then only
+    reshuffles *relative* difficulty and never changes the overall cycle length
+    (which --budget controls).  Set effort_neutral=False to let the blend set
+    its own pace.
+
+    Returns (weights_dict, rows) where weights_dict is slug -> (weight,
+    rationale) ready to hand to load_entries, and rows is a list of per-hilchot
+    detail dicts for data/proxy_weights.csv.
+    """
+    import math
+    try:
+        with open(commentary_path, encoding="utf-8") as f:
+            com = json.load(f)
+    except FileNotFoundError:
+        print(f"WARNING: commentary file {commentary_path} not found; "
+              f"using hand weights only.")
+        return dict(hand_weights), []
+    H = com.get("hilchot", {})
+    if not H:
+        return dict(hand_weights), []
+    basket_size = len(com.get("basket") or [])
+
+    # Per-meforshim geometric mean of (commentary words / Rambam words).
+    mef_set = set()
+    for r in H.values():
+        mef_set.update(r.get("meforshim", {}).keys())
+    G = {}
+    for m in mef_set:
+        ratios = []
+        for r in H.values():
+            mr = r.get("meforshim", {}).get(m)
+            rw = r.get("rambam_words", 0)
+            if mr and mr.get("present") and mr.get("words", 0) > 0 and rw > 0:
+                ratios.append(mr["words"] / rw)
+        if ratios:
+            G[m] = math.exp(sum(math.log(x) for x in ratios) / len(ratios))
+
+    # Unnormalised proxy per hilchot = mean of (ratio / G_m) over present m.
+    raw, cov, dens, ncmt = {}, {}, {}, {}
+    for slug, r in H.items():
+        contribs = []
+        for m, mr in r.get("meforshim", {}).items():
+            rw = r.get("rambam_words", 0)
+            if mr.get("present") and mr.get("words", 0) > 0 and m in G and rw > 0:
+                contribs.append((mr["words"] / rw) / G[m])
+        raw[slug] = (sum(contribs) / len(contribs)) if contribs else 0.0
+        cov[slug] = r.get("coverage", 0.0)
+        dens[slug] = r.get("density", 0.0)
+        ncmt[slug] = r.get("commentators", len(contribs))
+
+    vals = [v for v in raw.values() if v > 0]
+    G_raw = math.exp(sum(math.log(v) for v in vals) / len(vals)) if vals else 1.0
+    proxy = {s: (raw[s] / G_raw if raw[s] > 0 else 0.0) for s in H}
+
+    # Build the blended composite for every hand-weight hilchot.
+    composite, rows = {}, []
+    for slug, (hw, rat) in hand_weights.items():
+        pv = proxy.get(slug, 0.0)
+        c = cov.get(slug, 0.0)
+        nc = ncmt.get(slug, 0)
+        usable = (pv > 0) and (nc >= min_commentators) and (c >= coverage_min)
+        comp = (hw ** (1 - alpha) * pv ** alpha) if usable else hw
+        composite[slug] = comp
+        rows.append({
+            "slug": slug,
+            "coverage": c,
+            "commentators": nc,
+            "basket_size": basket_size,
+            "density": dens.get(slug, 0.0),
+            "hand_weight": hw,
+            "proxy_weight": pv if usable else 0.0,
+            "composite_weight": comp,
+            "source": "proxy" if usable else "hand",
+        })
+    rows_by_slug = {r["slug"]: r for r in rows}
+
+    # Effort-neutral: rescale only the proxy-used hilchot so their total weighted
+    # words match the hand-only total for those same hilchot.  Hand-only hilchot
+    # (e.g. the Introduction, Order of Prayer) keep their hand weight exactly --
+    # the proxy only reshuffles distribution, not overall pace.
+    if effort_neutral:
+        words = {}
+        with open(DATA_FILE, encoding="utf-8") as f:
+            data = json.load(f)
+        for s in data["sefarim"]:
+            for h in s["hilchot"]:
+                words[h["slug"]] = sum(sum(p) for p in h.get("halacha_words", []))
+        used = [r["slug"] for r in rows if r["source"] == "proxy"]
+        hand_total = sum(words[s] * hand_weights[s][0] for s in used)
+        comp_total = sum(words[s] * composite[s] for s in used)
+        if comp_total > 0:
+            k = hand_total / comp_total
+            for s in used:
+                composite[s] *= k
+                rows_by_slug[s]["composite_weight"] = composite[s]
+    weights_out = {slug: (composite[slug], rat) for slug, (w, rat) in hand_weights.items()}
+    return weights_out, rows
+
+
+def write_proxy_csv(rows, out_path, names=None):
+    """Write data/proxy_weights.csv: per-hilchot hand/proxy/composite weights."""
+    import csv as _csv
+    names = names or {}
+    fields = ["slug", "sefer_en", "hilchot_en", "commentators", "basket_size",
+              "coverage", "density", "hand_weight", "proxy_weight",
+              "composite_weight", "source"]
+    with open(out_path, "w", encoding="utf-8-sig", newline="") as f:
+        w = _csv.DictWriter(f, fieldnames=fields)
+        w.writeheader()
+        for r in rows:
+            n = names.get(r["slug"], {})
+            w.writerow({
+                "slug": r["slug"],
+                "sefer_en": n.get("sefer_en", ""),
+                "hilchot_en": n.get("hilchot_en", ""),
+                "commentators": r.get("commentators", 0),
+                "basket_size": r.get("basket_size", 0),
+                "coverage": round(r["coverage"], 3),
+                "density": round(r["density"], 3),
+                "hand_weight": round(r["hand_weight"], 3),
+                "proxy_weight": round(r["proxy_weight"], 3),
+                "composite_weight": round(r["composite_weight"], 3),
+                "source": r["source"],
+            })
+
+
 def load_splits(path=SPLITS_FILE):
     """slug -> {perek -> {halacha -> [parts]}} from data/halacha_splits.json.
 
@@ -452,7 +607,11 @@ def write_xlsx(rows, completion, params, out_path):
         ("Pacing model", f"weighted words: ~{params['budget']:.0f} effort/day "
                          f"(slack {params['slack']:.0f}, max {params['max_perakim']} perakim/day, "
                          f"min split {params['min_split_words']} words)"),
-        ("Effort formula", "words \u00d7 hilchot difficulty weight (data/weights.csv)"),
+        ("Effort formula",
+         ("words \u00d7 hilchot weight, blended with commentary-density proxy "
+          f"(α={params['proxy_blend']}, ≥{params['proxy_min_commentators']} commentators)"
+          if params.get("proxy") else
+          "words \u00d7 hilchot difficulty weight (data/weights.csv)")),
         ("Calendar", "Diaspora (UK)" if params["diaspora"] else "Israel"),
         ("Learning days", len(learn_rows)),
         ("Skipped days shown (Yom Tov etc.)", len(skip_rows)),
@@ -1633,6 +1792,25 @@ def main():
                     help="CSV with slug,weight columns (default: data/weights.csv)")
     ap.add_argument("--no-weights", action="store_true",
                     help="Ignore weights file (all hilchot weight 1.0)")
+    ap.add_argument("--proxy", action="store_true",
+                    help="Blend hand weights with a commentary-density difficulty proxy "
+                         "(data/commentary.json; run fetch_commentary.py first)")
+    ap.add_argument("--proxy-blend", type=float, default=0.5,
+                    help="Blend exponent: composite = hand^(1-a) * proxy^a (default 0.5)")
+    ap.add_argument("--coverage-min", type=float, default=0.25,
+                    help="Min fraction of attempted commentary nodes that must return "
+                         "usable text -- a fetch data-quality gate, not a difficulty "
+                         "signal (default 0.25)")
+    ap.add_argument("--proxy-min-commentators", type=int, default=3,
+                    help="Min distinct commentators on a hilchot to trust the proxy; "
+                         "with fewer, the density estimate is noise, so use the hand "
+                         "weight (default 3)")
+    ap.add_argument("--no-proxy-effort-neutral", action="store_true",
+                    help="Let --proxy change overall pace; default keeps total "
+                         "weighted words = hand-only (proxy only reshuffles)")
+    ap.add_argument("--commentary", default=os.path.join(HERE, "data", "commentary.json"),
+                    help="Commentary-density data from fetch_commentary.py "
+                         "(default: data/commentary.json)")
     ap.add_argument("--splits", default=SPLITS_FILE,
                     help="JSON break points for oversized single halachot "
                          "(default: data/halacha_splits.json)")
@@ -1666,6 +1844,33 @@ def main():
 
     weights = None if args.no_weights else load_weights(args.weights)
     splits = None if args.no_splits else load_splits(args.splits)
+    proxy_rows = None
+    if args.proxy:
+        if weights is None:
+            print("WARNING: --proxy given but --no-weights set; ignoring proxy.")
+        else:
+            weight_names = {}
+            with open(args.weights, encoding="utf-8-sig", newline="") as f:
+                for row in csv.DictReader(f):
+                    weight_names[row["slug"]] = {
+                        "sefer_en": row.get("sefer_en", ""),
+                        "hilchot_en": row.get("hilchot_en", ""),
+                    }
+            weights, proxy_rows = compute_proxy_weights(
+                args.commentary, weights, args.proxy_blend, args.coverage_min,
+                min_commentators=args.proxy_min_commentators,
+                effort_neutral=not args.no_proxy_effort_neutral)
+            pc = os.path.join(os.path.dirname(os.path.abspath(args.weights)),
+                             "proxy_weights.csv")
+            write_proxy_csv(proxy_rows, pc, weight_names)
+            n_proxy = sum(1 for r in proxy_rows if r['source'] == 'proxy')
+            ncm = sorted(r['commentators'] for r in proxy_rows if r['source'] == 'proxy')
+            print(f"Proxy blended (alpha={args.proxy_blend}, "
+                  f"commentators>={args.proxy_min_commentators}, "
+                  f"coverage>={args.coverage_min}); wrote {pc} "
+                  f"({n_proxy} hilchot use proxy, {len(proxy_rows) - n_proxy} hand-only"
+                  + (f"; commentators median {ncm[len(ncm) // 2]}, "
+                     f"range {ncm[0]}-{ncm[-1]}" if ncm else "") + ")")
     if splits:
         specs = [spec for part_splits in splits.values()
                  for h in part_splits.values() for spec in h.values()]
@@ -1690,7 +1895,11 @@ def main():
     params = {"start": start, "budget": budget, "slack": slack,
               "max_perakim": args.max_perakim, "min_split_words": args.min_split,
               "diaspora": diaspora, "min_effort": args.min_effort,
-              "window_start": window_start, "latest_start": latest_start}
+              "window_start": window_start, "latest_start": latest_start,
+              "proxy": args.proxy and weights is not None,
+              "proxy_blend": args.proxy_blend,
+              "proxy_min_commentators": args.proxy_min_commentators,
+              "coverage_min": args.coverage_min}
 
     rows, completion = build_rows(entries, start, budget, slack,
                                   args.max_perakim, args.min_split, diaspora)

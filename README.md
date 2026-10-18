@@ -44,6 +44,116 @@ Melachim ≈ 16 halachot/day vs Seder Tefillot ≈ 15+ — same *time*, differen
 pace. The average draft weight ≈ 1.21, which stretches the cycle from ~4.0
 to ~5.1 years; raise `--budget` or trim weights if that's too slow.
 
+### Commentary-density difficulty proxy
+
+The hand weights above are a subjective draft. As a cross-check we can use an
+*objective* signal: **how much the classical commentaries wrote on each sugya.**
+A sugya that drew voluminous debate (Kessef Mishneh, Maggid Mishneh, Hasagot
+HaRa'avad, Ohr Sameach, Tzafnat Pa'neach, …) was, in general, a harder / more
+contested one — so commentary *volume* is a reasonable proxy for difficulty.
+
+No single Rambam commentary is digitised in full, so we average across a
+**basket** of meforshim. Averaging fills the gaps where one commentary is sparse
+and cancels out individual-author verbosity.
+
+The basket is **discovered, not hand-written**. An earlier draft guessed twelve
+commentator names and concluded that "Maggid Mishneh and Radbaz are absent
+entirely" from Sefaria — that was wrong; they are only absent under the naming
+convention the guess used. So instead we ask Sefaria's links API which
+commentaries actually point at each hilchot, which turns up **49 distinct
+commentators**. We keep the 39 that are classical (excluding modern pedagogic
+works — Steinsaltz, Reshimot Shiurim, Yitzchak Yeranen — whose volume tracks
+exposition rather than difficulty) and digitised on at least 3 hilchot. That
+basket recovers Maggid Mishneh (26 hilchot), Hasagot HaRa'avad (63), Mishneh
+LaMelech (67), Maaseh Rokeach (69) and the Radbaz (as "Commentary of Mahari
+Kurkus and Radbaz", 3) — together **14.9M commentary words against the Rambam's
+own 768k**, i.e. ~19 commentary words per word of Rambam.
+
+Two other sources were evaluated and rejected:
+
+- **HebrewBooks** has the best *catalogue* but serves commentary through a JS
+  overlay: `rambam.aspx?…&text=1` answers plain HTTP with "Invalid Request", so
+  it is not scrapable.
+- **he.wikisource.org** does publish clean wikitext (`ws_discover.py` measures
+  it: 8 commentators, כסף משנה nearly complete, מגיד משנה only 19 hilchot), but
+  the transcriptions are partial. Sefaria's text is strictly larger on every
+  hilchot we compared — Maggid Mishneh on Shabbat is 79,980 words on Sefaria vs
+  13,983 on Wikisource, on Gerushin 42,066 vs 3,569 — so Wikisource adds
+  nothing and Sefaria is the sole source.
+
+The proxy for a hilchot is its **commentary density** — total commentary words
+divided by the Rambam's own word count (so long Rambam halachot don't look hard
+just for being long). Each meforshim is first normalised to its own geometric
+mean, so a verbose commentator can't dominate and a missing one merely drops
+out; the per-hilchot averages are then normalised to a clean multiplier. That
+per-author normalisation is what makes uneven coverage harmless: commentators
+don't all write on the same hilchot, so each hilchot is scored only by those who
+actually wrote on it, each measured against their own average. A hilchot nobody
+commented on scores as *average*, not as easy.
+
+Enable it with `--proxy`:
+
+```bash
+python fetch_commentary.py              # one-off; writes data/commentary.json
+python analyze_proxy.py                 # inspect correlations & biggest movers
+python generate_schedule.py --proxy     # blend hand weights + commentary proxy
+```
+
+The blend is geometric: `composite = hand^(1−α) · proxy^α` (α default 0.5,
+`--proxy-blend`). A hilchot uses the proxy only if at least
+`--proxy-min-commentators` (default 3) distinct commentators wrote on it — with
+one or two voices the density estimate is noise — and at least `--coverage-min`
+(default 0.25) of the attempted fetches returned usable text, which is a
+data-quality check on the fetch rather than a difficulty signal. Hilchot failing
+either gate keep their hand weight, so sparse digitisation never drags a sugya
+toward "easy". In practice **83 of 84** hilchot qualify (median 13 commentators,
+range 5–29); the only holdout is the Order of Prayer, which is liturgy and has
+no meforshim at all. The Introduction's four entries are not halachot either,
+so 5 of the 88 weighted rows fall back to hand weights.
+
+By default the blend is **effort-neutral** — rescaled so the total weighted
+words equal the hand-only total — meaning the proxy *only reshuffles relative
+difficulty* and never changes the overall cycle length (which `--budget`
+controls); pass `--no-proxy-effort-neutral` to let it set its own pace. Verified:
+937,433 weighted words either way, with the cycle moving only 1253 → 1257
+learning days (rounding).
+
+Per-hilchot detail (hand weight, commentator count, raw commentary density,
+proxy weight, blended composite, and whether the proxy was used) is written to
+`data/proxy_weights.csv`.
+
+#### How well does it work?
+
+The proxy is essentially **uncorrelated** with the hand weights (Pearson
+r ≈ −0.10, Spearman ≈ −0.10), i.e. it captures a genuinely different dimension
+rather than restating the draft. Blending two independent signals is the point,
+but it also means the proxy moves things a long way, so it's worth knowing where
+it is strong and where it is weak.
+
+We also measured a second candidate signal, **breadth** — how many distinct
+commentators wrote on a hilchot. It turns out to be nearly orthogonal to density
+(r ≈ +0.11) but weaker and topically confounded: commentators tend to cover
+whole *sefarim*, so breadth mostly records who wrote where rather than how hard
+the sugya is. It is reported in `proxy_weights.csv` and by `analyze_proxy.py` as
+a diagnostic, but deliberately not blended in.
+
+Where the proxy rates a sugya **harder** than the hand draft: Ownerless Property
+and Gifts (×2.1), Slaves (×2.1), Festival Offering (×2.1), Woman Suspected of
+Infidelity (×2.1), Circumcision (×2.0), Fringes (×1.9), Virgin Maiden (×1.8),
+Kings and Wars (×1.8). These are heavily-litigated civil/ritual areas, and the
+shift looks defensible.
+
+The systematic **blind spot** is technical or mathematical material, where the
+Rambam is already terse and exhaustive and the meforshim have proportionally
+less to add: Sanctification of the New Moon (astronomy; proxy ×0.17 against a
+hand weight of 1.5), Eruvin (geometry; ×0.25 vs 1.5), Vessels (×0.37 vs 1.5),
+Sabbath (×0.43 vs 1.5), Tefillin/Mezuzah (×0.46 vs 1.25). Conversely the
+densest commentary per Rambam word is concentrated in Temple service — Rest on
+the Tenth of Tishrei (88.8), Things Forbidden on the Altar (85.1), The Chosen
+Temple (73.2), Admission into the Sanctuary (63.1) — topics that are obscure
+rather than technically hard. α = 0.5 halves both effects, and the hand weights
+remain the place to encode "this is mathematically dense".
+
 ### Display conventions
 
 - Every row shows its **Sefer**; the first day of a new sefer is highlighted
@@ -57,10 +167,22 @@ to ~5.1 years; raise `--budget` or trim weights if that's too slow.
 
 - `fetch_data.py` — downloads Rambam structure, per-perek halacha counts and
   per-halacha word counts from Sefaria into `data/rambam.json` (cached).
+- `fetch_commentary.py` — discovers *every* classical Rambam commentary Sefaria
+  links to each hilchot, downloads its Hebrew text and writes
+  `data/commentary.json` (cached + resumable); the basis of the optional
+  commentary-density difficulty proxy (see above).
+- `analyze_proxy.py` — offline analysis of that proxy: correlations against the
+  hand weights and against commentator breadth, plus the biggest movers.
+- `ws_discover.py` — measures what Hebrew Wikisource holds for these meforshim
+  (the evidence behind "Sefaria wins" above); writes `data/ws_pages.json`.
 - `plan_splits.py` — derives `data/halacha_splits.json`: break points inside
   oversized single halachot.
 - `generate_schedule.py` — builds the schedule; writes XLSX + PDF + HTML + ICS.
 - `data/weights.csv` — per-hilchot difficulty weights (**user-editable**).
+- `data/commentary.json` — per-hilchot commentary word counts for the whole
+  discovered basket (output of `fetch_commentary.py`).
+- `data/proxy_weights.csv` — per-hilchot hand / proxy / composite weights, written
+  when `generate_schedule.py --proxy` is used.
 - `data/halacha_splits.json` — break points inside the handful of oversized
   single halachot that would otherwise swallow a whole day (see below).
 - `data/rambam.json` — cached Sefaria data.
@@ -129,6 +251,13 @@ python generate_schedule.py --min-split 60      # fewer small perek fragments
 # lower the floor if you want to explore slower cycles there too
 python generate_schedule.py --min-effort 150
 python generate_schedule.py --start 2026-10-12 --israel --outdir output --no-pdf --no-html --no-ics
+
+# blend the hand weights with the commentary-density proxy (see above)
+python fetch_commentary.py                 # one-off: build data/commentary.json
+python analyze_proxy.py                    # correlations + biggest movers (no network)
+python generate_schedule.py --proxy       # weights = hand × commentary proxy
+python generate_schedule.py --proxy --proxy-blend 0.35   # hand-weighted, proxy nudges
+python generate_schedule.py --proxy --no-proxy-effort-neutral  # let proxy set the pace
 ```
 
 ### Parameters
@@ -144,6 +273,12 @@ python generate_schedule.py --start 2026-10-12 --israel --outdir output --no-pdf
 | `--splits` | data/halacha_splits.json | Break points inside oversized halachot |
 | `--no-splits` | off | Never break inside a halacha |
 | `--no-weights` | off | Treat every hilchot as weight 1.0 |
+| `--proxy` | off | Blend hand weights with the commentary-density proxy (data/commentary.json) |
+| `--proxy-blend` | 0.5 | Blend exponent α: composite = hand^(1−α) · proxy^α |
+| `--proxy-min-commentators` | 3 | Min distinct commentators on a hilchot to trust the proxy; below this, use hand weight |
+| `--coverage-min` | 0.25 | Min fraction of attempted commentary fetches returning usable text (fetch data-quality gate) |
+| `--commentary` | data/commentary.json | Commentary-density data from `fetch_commentary.py` |
+| `--no-proxy-effort-neutral` | off | Let `--proxy` change overall pace (default keeps total effort = hand-only) |
 | `--israel` | off | Israel calendar instead of diaspora |
 | `--min-effort` | 250 | Slowest pace offered by the HTML effort control; also sizes the Hebrew-calendar window the HTML embeds (lower values ⇒ bigger HTML file, slower generation) |
 | `--window-start` | today | Earliest date offered by the HTML start control |

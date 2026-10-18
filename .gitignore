@@ -11,5 +11,9 @@ venv/
 # Sefaria text fetched while planning halacha splits (regenerate anytime)
 data/_sefaria_text_cache.json
 
+# Hebrew Wikisource page listing from ws_discover.py (regenerate anytime;
+# kept only as the evidence behind the "Sefaria wins" source decision)
+data/ws_pages.json
+
 # local scratch copies of generated output
 output/*_copy.*

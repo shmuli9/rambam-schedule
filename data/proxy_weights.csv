@@ -1,0 +1,89 @@
+﻿slug,sefer_en,hilchot_en,commentators,basket_size,coverage,density,hand_weight,proxy_weight,composite_weight,source
+"Mishneh_Torah,_Transmission_of_the_Oral_Law",Introduction,Transmission of the Oral Law,0,39,0.0,0.0,0.75,0.0,0.75,hand
+"Mishneh_Torah,_Positive_Mitzvot",Introduction,Positive Mitzvot,0,39,0.0,0.0,0.5,0.0,0.5,hand
+"Mishneh_Torah,_Negative_Mitzvot",Introduction,Negative Mitzvot,0,39,0.0,0.0,0.5,0.0,0.5,hand
+"Mishneh_Torah,_Overview_of_Mishneh_Torah_Contents",Introduction,Overview of Mishneh Torah Contents,0,39,0.0,0.0,0.5,0.0,0.5,hand
+"Mishneh_Torah,_Foundations_of_the_Torah",Sefer Madda,Foundations of the Torah,12,39,1.0,34.015,1.25,1.031,1.269,proxy
+"Mishneh_Torah,_Human_Dispositions",Sefer Madda,Human Dispositions,13,39,1.0,16.154,0.75,0.361,0.581,proxy
+"Mishneh_Torah,_Torah_Study",Sefer Madda,Torah Study,17,39,1.0,27.795,0.75,0.811,0.872,proxy
+"Mishneh_Torah,_Foreign_Worship_and_Customs_of_the_Nations",Sefer Madda,Foreign Worship and Customs of the Nations,14,39,1.0,39.311,1.25,1.341,1.447,proxy
+"Mishneh_Torah,_Repentance",Sefer Madda,Repentance,19,39,1.0,13.912,1.0,0.578,0.85,proxy
+"Mishneh_Torah,_Reading_the_Shema",Sefer Ahavah,Reading the Shema,17,39,1.0,33.716,1.0,1.339,1.293,proxy
+"Mishneh_Torah,_Prayer_and_the_Priestly_Blessing",Sefer Ahavah,Prayer and the Priestly Blessing,16,39,1.0,12.736,1.0,0.511,0.799,proxy
+"Mishneh_Torah,_Tefillin,_Mezuzah_and_the_Torah_Scroll",Sefer Ahavah,"Tefillin, Mezuzah and the Torah Scroll",15,39,1.0,10.143,1.25,0.577,0.95,proxy
+"Mishneh_Torah,_Fringes",Sefer Ahavah,Fringes,16,39,1.0,22.193,0.75,1.413,1.151,proxy
+"Mishneh_Torah,_Blessings",Sefer Ahavah,Blessings,22,39,1.0,24.005,0.75,0.895,0.916,proxy
+"Mishneh_Torah,_Circumcision",Sefer Ahavah,Circumcision,18,39,1.0,30.996,0.75,1.528,1.196,proxy
+"Mishneh_Torah,_The_Order_of_Prayer",Sefer Ahavah,The Order of Prayer,0,39,0.0,0.0,0.5,0.0,0.5,hand
+"Mishneh_Torah,_Sabbath",Sefer Zemanim,Sabbath,21,39,1.0,21.257,1.5,0.638,1.093,proxy
+"Mishneh_Torah,_Eruvin",Sefer Zemanim,Eruvin,18,39,1.0,9.25,1.5,0.379,0.842,proxy
+"Mishneh_Torah,_Rest_on_the_Tenth_of_Tishrei",Sefer Zemanim,Rest on the Tenth of Tishrei,16,39,1.0,88.811,1.0,1.507,1.372,proxy
+"Mishneh_Torah,_Rest_on_a_Holiday",Sefer Zemanim,Rest on a Holiday,20,39,1.0,39.008,1.0,1.27,1.259,proxy
+"Mishneh_Torah,_Leavened_and_Unleavened_Bread",Sefer Zemanim,Leavened and Unleavened Bread,29,39,1.0,60.043,1.25,1.562,1.562,proxy
+"Mishneh_Torah,_Shofar,_Sukkah_and_Lulav",Sefer Zemanim,"Shofar, Sukkah and Lulav",18,39,1.0,37.666,1.0,1.215,1.232,proxy
+"Mishneh_Torah,_Sheqel_Dues",Sefer Zemanim,Sheqel Dues,12,39,1.0,15.835,1.25,0.904,1.188,proxy
+"Mishneh_Torah,_Sanctification_of_the_New_Month",Sefer Zemanim,Sanctification of the New Month,15,39,1.0,2.037,1.5,0.256,0.693,proxy
+"Mishneh_Torah,_Fasts",Sefer Zemanim,Fasts,19,39,1.0,11.985,0.75,0.516,0.695,proxy
+"Mishneh_Torah,_Scroll_of_Esther_and_Hanukkah",Sefer Zemanim,Scroll of Esther and Hanukkah,18,39,1.0,23.337,0.75,0.938,0.937,proxy
+"Mishneh_Torah,_Marriage",Sefer Nashim,Marriage,20,39,1.0,36.467,1.5,1.339,1.584,proxy
+"Mishneh_Torah,_Divorce",Sefer Nashim,Divorce,18,39,1.0,30.032,1.5,1.504,1.678,proxy
+"Mishneh_Torah,_Levirate_Marriage_and_Release",Sefer Nashim,Levirate Marriage and Release,13,39,1.0,16.347,1.25,0.74,1.075,proxy
+"Mishneh_Torah,_Virgin_Maiden",Sefer Nashim,Virgin Maiden,19,39,1.0,27.169,1.0,1.827,1.511,proxy
+"Mishneh_Torah,_Woman_Suspected_of_Infidelity",Sefer Nashim,Woman Suspected of Infidelity,11,39,1.0,25.942,1.0,2.049,1.6,proxy
+"Mishneh_Torah,_Forbidden_Intercourse",Sefer Kedushah,Forbidden Intercourse,18,39,1.0,14.571,1.5,1.223,1.513,proxy
+"Mishneh_Torah,_Forbidden_Foods",Sefer Kedushah,Forbidden Foods,16,39,1.0,21.646,1.25,0.935,1.208,proxy
+"Mishneh_Torah,_Ritual_Slaughter",Sefer Kedushah,Ritual Slaughter,14,39,1.0,22.921,1.0,1.052,1.146,proxy
+"Mishneh_Torah,_Oaths",Sefer Haflaah,Oaths,14,39,1.0,13.779,1.25,0.995,1.246,proxy
+"Mishneh_Torah,_Vows",Sefer Haflaah,Vows,16,39,1.0,16.779,1.25,0.975,1.234,proxy
+"Mishneh_Torah,_Nazariteship",Sefer Haflaah,Nazariteship,13,39,1.0,16.394,1.0,1.236,1.242,proxy
+"Mishneh_Torah,_Appraisals_and_Devoted_Property",Sefer Haflaah,Appraisals and Devoted Property,13,39,1.0,17.814,1.0,1.226,1.237,proxy
+"Mishneh_Torah,_Diverse_Species",Sefer Zeraim,Diverse Species,14,39,1.0,15.648,1.25,0.892,1.18,proxy
+"Mishneh_Torah,_Gifts_to_the_Poor",Sefer Zeraim,Gifts to the Poor,10,39,1.0,21.182,1.0,1.384,1.315,proxy
+"Mishneh_Torah,_Heave_Offerings",Sefer Zeraim,Heave Offerings,11,39,1.0,22.13,1.5,1.339,1.584,proxy
+"Mishneh_Torah,_Tithes",Sefer Zeraim,Tithes,11,39,1.0,5.983,1.25,0.793,1.112,proxy
+"Mishneh_Torah,_Second_Tithes_and_Fourth_Year's_Fruit",Sefer Zeraim,Second Tithes and Fourth Year's Fruit,11,39,1.0,6.526,1.0,0.905,1.063,proxy
+"Mishneh_Torah,_First_Fruits_and_other_Gifts_to_Priests_Outside_the_Sanctuary",Sefer Zeraim,First Fruits and other Gifts to Priests Outside the Sanctuary,8,39,1.0,7.171,0.75,1.042,0.988,proxy
+"Mishneh_Torah,_Sabbatical_Year_and_the_Jubilee",Sefer Zeraim,Sabbatical Year and the Jubilee,8,39,1.0,5.336,1.25,0.727,1.066,proxy
+"Mishneh_Torah,_The_Chosen_Temple",Sefer Avodah,The Chosen Temple,14,39,1.0,73.224,1.25,1.518,1.54,proxy
+"Mishneh_Torah,_Vessels_of_the_Sanctuary_and_Those_Who_Serve_Therein",Sefer Avodah,Vessels of the Sanctuary and Those Who Serve Therein,14,39,1.0,49.685,1.0,1.121,1.183,proxy
+"Mishneh_Torah,_Admission_into_the_Sanctuary",Sefer Avodah,Admission into the Sanctuary,14,39,1.0,63.135,1.0,1.42,1.332,proxy
+"Mishneh_Torah,_Things_Forbidden_on_the_Altar",Sefer Avodah,Things Forbidden on the Altar,16,39,1.0,85.104,1.0,1.559,1.396,proxy
+"Mishneh_Torah,_Sacrificial_Procedure",Sefer Avodah,Sacrificial Procedure,13,39,1.0,48.081,1.0,1.335,1.291,proxy
+"Mishneh_Torah,_Daily_Offerings_and_Additional_Offerings",Sefer Avodah,Daily Offerings and Additional Offerings,14,39,1.0,23.454,1.0,1.061,1.151,proxy
+"Mishneh_Torah,_Sacrifices_Rendered_Unfit",Sefer Avodah,Sacrifices Rendered Unfit,14,39,1.0,21.784,1.25,0.979,1.236,proxy
+"Mishneh_Torah,_Service_on_the_Day_of_Atonement",Sefer Avodah,Service on the Day of Atonement,15,39,1.0,21.65,1.0,1.117,1.181,proxy
+"Mishneh_Torah,_Trespass",Sefer Avodah,Trespass,14,39,1.0,22.48,1.25,1.49,1.525,proxy
+"Mishneh_Torah,_Paschal_Offering",Sefer Korbanot,Paschal Offering,18,39,1.0,20.951,1.0,1.371,1.309,proxy
+"Mishneh_Torah,_Festival_Offering",Sefer Korbanot,Festival Offering,14,39,1.0,21.281,1.0,2.086,1.614,proxy
+"Mishneh_Torah,_Firstlings",Sefer Korbanot,Firstlings,14,39,1.0,11.554,1.25,1.102,1.312,proxy
+"Mishneh_Torah,_Offerings_for_Unintentional_Transgressions",Sefer Korbanot,Offerings for Unintentional Transgressions,10,39,1.0,12.485,1.25,1.072,1.294,proxy
+"Mishneh_Torah,_Offerings_for_Those_with_Incomplete_Atonement",Sefer Korbanot,Offerings for Those with Incomplete Atonement,13,39,1.0,10.304,1.0,0.696,0.932,proxy
+"Mishneh_Torah,_Substitution",Sefer Korbanot,Substitution,12,39,1.0,16.63,1.25,1.445,1.502,proxy
+"Mishneh_Torah,_Defilement_by_a_Corpse",Sefer Taharah,Defilement by a Corpse,8,39,1.0,5.761,1.5,1.017,1.38,proxy
+"Mishneh_Torah,_Red_Heifer",Sefer Taharah,Red Heifer,10,39,1.0,5.686,1.25,0.652,1.009,proxy
+"Mishneh_Torah,_Defilement_by_Leprosy",Sefer Taharah,Defilement by Leprosy,5,39,1.0,4.933,1.5,1.132,1.456,proxy
+"Mishneh_Torah,_Those_Who_Defile_Bed_or_Seat",Sefer Taharah,Those Who Defile Bed or Seat,7,39,1.0,4.63,1.25,0.667,1.02,proxy
+"Mishneh_Torah,_Other_Sources_of_Defilement",Sefer Taharah,Other Sources of Defilement,8,39,1.0,4.728,1.25,0.611,0.977,proxy
+"Mishneh_Torah,_Defilement_of_Foods",Sefer Taharah,Defilement of Foods,6,39,1.0,4.083,1.25,0.81,1.125,proxy
+"Mishneh_Torah,_Vessels",Sefer Taharah,Vessels,9,39,1.0,3.607,1.5,0.558,1.022,proxy
+"Mishneh_Torah,_Immersion_Pools",Sefer Taharah,Immersion Pools,6,39,1.0,7.279,1.0,1.078,1.16,proxy
+"Mishneh_Torah,_Damages_to_Property",Sefer Nezikim,Damages to Property,8,39,1.0,30.866,1.5,1.615,1.739,proxy
+"Mishneh_Torah,_Theft",Sefer Nezikim,Theft,12,39,1.0,25.304,1.25,1.295,1.422,proxy
+"Mishneh_Torah,_Robbery_and_Lost_Property",Sefer Nezikim,Robbery and Lost Property,13,39,1.0,15.401,1.25,0.728,1.066,proxy
+"Mishneh_Torah,_One_Who_Injures_a_Person_or_Property",Sefer Nezikim,One Who Injures a Person or Property,11,39,1.0,12.119,1.25,0.715,1.057,proxy
+"Mishneh_Torah,_Murderer_and_the_Preservation_of_Life",Sefer Nezikim,Murderer and the Preservation of Life,10,39,1.0,8.345,1.0,0.821,1.013,proxy
+"Mishneh_Torah,_Sales",Sefer Kinyan,Sales,15,39,1.0,20.571,1.25,0.894,1.181,proxy
+"Mishneh_Torah,_Ownerless_Property_and_Gifts",Sefer Kinyan,Ownerless Property and Gifts,12,39,1.0,25.851,1.0,2.126,1.63,proxy
+"Mishneh_Torah,_Neighbors",Sefer Kinyan,Neighbors,9,39,1.0,9.452,0.75,0.565,0.728,proxy
+"Mishneh_Torah,_Agents_and_Partners",Sefer Kinyan,Agents and Partners,11,39,1.0,9.252,1.0,0.909,1.066,proxy
+"Mishneh_Torah,_Slaves",Sefer Kinyan,Slaves,10,39,1.0,17.905,1.0,2.125,1.629,proxy
+"Mishneh_Torah,_Hiring",Sefer Mishpatim,Hiring,9,39,1.0,14.149,1.0,0.796,0.997,proxy
+"Mishneh_Torah,_Borrowing_and_Deposit",Sefer Mishpatim,Borrowing and Deposit,9,39,1.0,15.867,1.0,1.005,1.12,proxy
+"Mishneh_Torah,_Creditor_and_Debtor",Sefer Mishpatim,Creditor and Debtor,10,39,1.0,23.14,1.5,1.593,1.728,proxy
+"Mishneh_Torah,_Plaintiff_and_Defendant",Sefer Mishpatim,Plaintiff and Defendant,15,39,1.0,16.705,1.25,1.065,1.289,proxy
+"Mishneh_Torah,_Inheritances",Sefer Mishpatim,Inheritances,10,39,1.0,10.732,1.25,0.746,1.079,proxy
+"Mishneh_Torah,_The_Sanhedrin_and_the_Penalties_within_Their_Jurisdiction",Sefer Shoftim,The Sanhedrin and the Penalties within Their Jurisdiction,7,39,1.0,8.814,1.25,0.754,1.085,proxy
+"Mishneh_Torah,_Testimony",Sefer Shoftim,Testimony,11,39,1.0,12.437,1.25,0.876,1.169,proxy
+"Mishneh_Torah,_Rebels",Sefer Shoftim,Rebels,7,39,1.0,6.416,1.0,1.266,1.257,proxy
+"Mishneh_Torah,_Mourning",Sefer Shoftim,Mourning,12,39,1.0,9.042,1.0,0.689,0.928,proxy
+"Mishneh_Torah,_Kings_and_Wars",Sefer Shoftim,Kings and Wars,12,39,1.0,6.485,0.75,1.349,1.124,proxy
