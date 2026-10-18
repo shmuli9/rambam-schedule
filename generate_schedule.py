@@ -903,6 +903,10 @@ def write_html(entries, params, out_path):
   tr.skip td { background: var(--grey) !important; color:#707070; font-style: italic; }
   tr.transition td { background: var(--blue) !important; }
   td.learning { min-width: 320px; }
+  td.chk { text-align:center; }
+  td.chk input { cursor:pointer; width:16px; height:16px; }
+  tr.done td { background:#e6f4ea !important; color:#4a5a4f; }
+  .controls .progress { font-size:13px; color:#2e6b3f; font-weight:600; }
   td.note { min-width: 160px; }
   .he { color:#444; font-size: 12px; }
   td[data-v] { font-variant-numeric: tabular-nums; }
@@ -959,6 +963,8 @@ def write_html(entries, params, out_path):
   </select>
   <label><input type="checkbox" id="hideSkips"> Hide skipped days</label>
   <button id="reset">Reset</button>
+  <span class="progress" id="progress"></span>
+  <button id="clearDone" title="Forget all completed days (stored only in this browser)" hidden>Clear progress</button>
   <button id="ics" class="primary" title="Download an .ics file of the current pace — import into Apple Calendar, Gmail, Outlook, etc.">📅 Export .ics</button>
   <span class="count" id="count"></span>
 </div>
@@ -973,6 +979,7 @@ def write_html(entries, params, out_path):
 <div class="wrap">
 <table id="sched">
   <thead><tr>
+    <th data-type="num" title="Tick a day to mark it and every day before it as completed. Completed days keep their halachot when you change the effort.">Done</th>
     <th data-type="num">Day #</th>
     <th data-type="str">Date</th>
     <th data-type="str">Weekday</th>
@@ -1011,6 +1018,8 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
   const effortNum = document.getElementById('effortNum');
   const startDate = document.getElementById('startDate');
   const statsEl = document.getElementById('stats');
+  const progressEl = document.getElementById('progress');
+  const clearBtn = document.getElementById('clearDone');
   const chartEl = document.getElementById('distChart');
   const stats2El = document.getElementById('distStats');
   const distPanel = document.getElementById('distPanel');
@@ -1094,20 +1103,77 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
                  : h[1] + ' ' + p[1] + ' (' + spanText(p, a, b) + ', ' + words + ' words)';
   }
 
+  /* ---- completed days (kept in this browser's localStorage) ---------- */
+  const STORE_KEY = 'rambam-yad-progress-v1';
+  // [{iso, items: [[perekIdx, firstUnit, lastUnit], ...]}, ...] in schedule order
+  let frozen = loadFrozen();
+  function loadFrozen() {
+    try {
+      const d = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
+      if (d && d.n === PERAKIM.length && Array.isArray(d.days)) return d.days;
+    } catch (e) { /* storage blocked or corrupt: start empty */ }
+    return [];
+  }
+  function saveFrozen() {
+    try {
+      if (frozen.length) localStorage.setItem(STORE_KEY, JSON.stringify({ n: PERAKIM.length, days: frozen }));
+      else localStorage.removeItem(STORE_KEY);
+    } catch (e) { /* ignore */ }
+  }
+
+  function makeLearnRow(items, effort, day, dayNo, seen, done) {
+    const his = items.map(it => PERAKIM[it.p][0]);
+    const seferIdx = uniq(his.map(hi => HILCHOT[hi][0]));
+    const newNames = seferIdx.filter(si => !seen.has(si)).map(si => SEFARIM[si][0]);
+    seferIdx.forEach(si => seen.add(si));
+    const weights = uniq(items.map(it => PERAKIM[it.p][3]));
+    return {
+      type: 'learn', done: done, dayNo: dayNo, iso: day[0], heb: day[1], items: items,
+      sefer: seferIdx.map(si => SEFARIM[si][0]).join(', '),
+      hil: uniq(his.map(hi => HILCHOT[hi][1])).join(', '),
+      hilHe: uniq(his.map(hi => HILCHOT[hi][2])).join(', '),
+      weightStr: weights.map(fmtW).join(' / '),
+      weightAvg: weights.reduce((x, y) => x + y, 0) / weights.length,
+      newSefer: newNames.length ? '→ New sefer: ' + newNames.join(', ') : '',
+      halachot: items.reduce((s, it) => {
+        const hs = new Set();
+        for (let i = it.a; i <= it.b; i++) hs.add(unit(PERAKIM[it.p], i).halacha);
+        return s + hs.size;
+      }, 0),
+      words: items.reduce((s, it) => s + sliceSum(PWORD[it.p], it.a - 1, it.b), 0),
+      effort: effort
+    };
+  }
+
   /* ---- the pacer (port of build_rows / Cursor.next_day) -------------- */
+  // Completed (frozen) days are replayed as-is; only the days after them are
+  // re-paced at `budget`, starting no earlier than the picked start date.
   function buildSchedule(budget, from) {
     const slack = Math.round(budget * 0.08);
     const rows = [];
     const seen = new Set();
-    let i = 0, off = 0, dayNo = 0;
+    const pStart = pickedStart();
+    const lastFz = frozen.length ? frozen[frozen.length - 1].iso : '';
+    let i = 0, off = 0, dayNo = 0, fk = 0;
 
     for (let di = from; di < DAYS.length; di++) {
       const day = DAYS[di];
-      const iso = day[0], heb = day[1], ri = day[2];
-      if (ri !== 0) {                                  // yom tov / erev yom tov / tisha b'av
-        rows.push({ type: 'skip', iso: iso, heb: heb, reason: REASONS[ri] });
+      const iso = day[0], ri = day[2];
+      if (fk < frozen.length && frozen[fk].iso === iso) {   // a completed day: keep it
+        const items = frozen[fk++].items.map(x => ({ p: x[0], a: x[1], b: x[2] }));
+        const effort = items.reduce((s, it) => s + sliceSum(PWORD[it.p], it.a - 1, it.b) * PERAKIM[it.p][3], 0);
+        const last = items[items.length - 1];
+        i = last.p; off = last.b;
+        if (off >= PWORD[i].length) { i++; off = 0; }
+        rows.push(makeLearnRow(items, effort, day, ++dayNo, seen, true));
         continue;
       }
+      if (iso <= lastFz || ri !== 0) {
+        if (ri !== 0 && (iso <= lastFz || iso >= pStart))   // yom tov / erev yom tov / tisha b'av
+          rows.push({ type: 'skip', iso: iso, heb: day[1], reason: REASONS[ri] });
+        continue;
+      }
+      if (iso < pStart) continue;
       if (i >= PERAKIM.length) break;
 
       /* consume ~budget weighted words */
@@ -1136,31 +1202,9 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
         if (off >= w.length) { i++; off = 0; }
       }
       if (!items.length) break;
-
-      dayNo++;
-      const his = items.map(it => PERAKIM[it.p][0]);
-      const seferIdx = uniq(his.map(hi => HILCHOT[hi][0]));
-      const newNames = seferIdx.filter(si => !seen.has(si)).map(si => SEFARIM[si][0]);
-      seferIdx.forEach(si => seen.add(si));
-      const weights = uniq(items.map(it => PERAKIM[it.p][3]));
-      rows.push({
-        type: 'learn', dayNo: dayNo, iso: iso, heb: heb, items: items,
-        sefer: seferIdx.map(si => SEFARIM[si][0]).join(', '),
-        hil: uniq(his.map(hi => HILCHOT[hi][1])).join(', '),
-        hilHe: uniq(his.map(hi => HILCHOT[hi][2])).join(', '),
-        weightStr: weights.map(fmtW).join(' / '),
-        weightAvg: weights.reduce((x, y) => x + y, 0) / weights.length,
-        newSefer: newNames.length ? '\u2192 New sefer: ' + newNames.join(', ') : '',
-        halachot: items.reduce((s, it) => {
-          const hs = new Set();
-          for (let i = it.a; i <= it.b; i++) hs.add(unit(PERAKIM[it.p], i).halacha);
-          return s + hs.size;
-        }, 0),
-        words: items.reduce((s, it) => s + sliceSum(PWORD[it.p], it.a - 1, it.b), 0),
-        effort: effort
-      });
+      rows.push(makeLearnRow(items, effort, day, ++dayNo, seen, false));
     }
-    return { rows: rows, complete: i >= PERAKIM.length, budget: budget, start: pickedStart() };
+    return { rows: rows, complete: i >= PERAKIM.length, budget: budget, start: pStart };
   }
 
   /* ---- effort distribution (histogram + normal fit) ----------------- */
@@ -1285,12 +1329,15 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
   function renderRow(r) {
     if (r.type === 'skip') {
       return '<tr class="skip" data-type="skip">' +
-        '<td></td><td data-v="' + r.iso + '">' + r.iso + '</td><td>' + wdOf(r.iso) + '</td>' +
+        '<td></td><td></td><td data-v="' + r.iso + '">' + r.iso + '</td><td>' + wdOf(r.iso) + '</td>' +
         '<td dir="rtl" lang="he">' + esc(r.heb) + '</td>' +
         '<td></td><td></td><td></td><td></td><td></td><td></td><td></td>' +
         '<td class="note">No learning \u2014 ' + esc(r.reason) + '</td></tr>';
     }
-    return '<tr' + (r.newSefer ? ' class="transition"' : '') + ' data-type="learn">' +
+    const cls = (r.done ? 'done' : '') + (r.newSefer ? ' transition' : '');
+    return '<tr' + (cls ? ' class="' + cls.trim() + '"' : '') + ' data-type="learn">' +
+      '<td class="chk" data-v="' + (r.done ? 1 : 0) + '"><input type="checkbox" data-day="' + r.dayNo + '"' +
+        (r.done ? ' checked' : '') + ' aria-label="Mark day ' + r.dayNo + ' completed"></td>' +
       '<td data-v="' + r.dayNo + '">' + r.dayNo + '</td>' +
       '<td data-v="' + r.iso + '">' + r.iso + '</td>' +
       '<td>' + wdOf(r.iso) + '</td>' +
@@ -1310,7 +1357,8 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
   function updateStats(res) {
     const learn = res.rows.filter(r => r.type === 'learn');
     const n = learn.length;
-    let txt = n.toLocaleString() + ' learning days';
+    const nDone = learn.filter(r => r.done).length;
+    let txt = n.toLocaleString() + ' learning days' + (nDone ? ' (' + nDone + ' completed)' : '');
     if (n && res.complete) {
       const a = Date.parse(learn[0].iso + 'T00:00:00Z');
       const b = Date.parse(learn[n - 1].iso + 'T00:00:00Z');
@@ -1329,7 +1377,7 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
 
   function rebuild() {
     const budget = parseFloat(effortNum.value) || DEFAULT_EFFORT;
-    const from = Math.min(startIndex(pickedStart()), DAYS.length - 1);
+    const from = Math.min(startIndex(frozen.length ? frozen[0].iso : pickedStart()), DAYS.length - 1);
     const res = buildSchedule(budget, from);
     current = res.rows;
     tbody.innerHTML = current.map(renderRow).join('');
@@ -1337,7 +1385,19 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     if (sortCol >= 0) sortRows(sortCol);
     apply();
     updateStats(res);
-    renderDist(res.rows.filter(r => r.type === 'learn'), budget);
+    renderDist(res.rows.filter(r => r.type === 'learn' && !r.done), budget);
+    const nDone = frozen.length;
+    progressEl.textContent = nDone ? '\u2713 ' + nDone + ' day' + (nDone === 1 ? '' : 's') + ' completed' : '';
+    clearBtn.hidden = !nDone;
+  }
+
+  // tick day N: it and every day before it become completed (their halachot are
+  // kept); untick day N: it and every later day go back to being re-paced
+  function setDoneThrough(dayNo, done) {
+    const keep = current.filter(r => r.type === 'learn' && (done ? r.dayNo <= dayNo : r.dayNo < dayNo));
+    frozen = keep.map(r => ({ iso: r.iso, items: r.items.map(it => [it.p, it.a, it.b]) }));
+    saveFrozen();
+    rebuild();
   }
 
   /* ---- filtering + sorting ------------------------------------------ */
@@ -1350,7 +1410,7 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
       let ok = true;
       if (hideSkips.checked && tr.dataset.type === 'skip') ok = false;
       if (ok && type && tr.dataset.type !== type) ok = false;
-      if (ok && sefer && !(tr.cells[4].textContent.split(', ').includes(sefer))) ok = false;
+      if (ok && sefer && !(tr.cells[5].textContent.split(', ').includes(sefer))) ok = false;
       if (ok && query && !(tr.textContent.toLowerCase().includes(query))) ok = false;
       tr.style.display = ok ? '' : 'none';
       if (ok) shown++;
@@ -1403,7 +1463,7 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     return out.join('\r\n');
   }
   function currentEvents() {
-    return current.filter(r => r.type === 'learn').map(r => {
+    return current.filter(r => r.type === 'learn' && !r.done).map(r => {
       const parts = r.items.map(it => {
         const p = PERAKIM[it.p], w = PWORD[it.p];
         if (it.a === 1 && it.b === w.length) return HILCHOT[p[0]][1] + ' ' + p[1];
@@ -1458,9 +1518,27 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
   }
 
   /* ---- wiring ------------------------------------------------------- */
+  /* last effort / start the user chose, restored on reload */
+  const PREFS_KEY = 'rambam-yad-prefs-v1';
+  function savePrefs() {
+    try {
+      localStorage.setItem(PREFS_KEY, JSON.stringify({ effort: effortNum.value, start: startDate.value }));
+    } catch (e) { /* ignore */ }
+  }
+  function loadPrefs() {
+    try {
+      const d = JSON.parse(localStorage.getItem(PREFS_KEY) || 'null');
+      if (!d) return;
+      const e = parseFloat(d.effort);
+      if (e >= 50 && e <= 20000) effortNum.value = e;
+      if (/^\d{4}-\d{2}-\d{2}$/.test(d.start || '')) startDate.value = d.start;
+      updateBudgetLabel();
+    } catch (e) { /* ignore */ }
+  }
   let pending = null;
   function scheduleRebuild() {
     updateBudgetLabel();
+    savePrefs();
     clearTimeout(pending);
     pending = setTimeout(rebuild, 90);
   }
@@ -1485,16 +1563,28 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     q.value = ''; seferSel.value = ''; typeSel.value = ''; hideSkips.checked = false;
     effortNum.value = DEFAULT_EFFORT; effortRange.value = DEFAULT_EFFORT;
     startDate.value = DEFAULT_START;
+    savePrefs();
     sortCol = -1; sortDir = 1;
     ths.forEach(th => { const a = th.querySelector('.arrow'); if (a) a.remove(); });
     rebuild();
   });
   document.getElementById('ics').addEventListener('click', exportIcs);
+  tbody.addEventListener('change', e => {
+    const cb = e.target;
+    if (cb.matches && cb.matches('input[data-day]')) setDoneThrough(+cb.dataset.day, cb.checked);
+  });
+  clearBtn.addEventListener('click', () => {
+    if (!confirm('Forget all ' + frozen.length + ' completed days? The schedule will be re-paced from the start.')) return;
+    frozen = [];
+    saveFrozen();
+    rebuild();
+  });
   distToggle.addEventListener('click', () => {
     const collapsed = distPanel.classList.toggle('collapsed');
     distToggle.textContent = collapsed ? 'Show' : 'Hide';
   });
 
+  loadPrefs();
   rebuild();
 })();
 </script>
