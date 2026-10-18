@@ -352,5 +352,10 @@ service worker (`sw.js`) precaches the landing page, both interactive schedules,
 the manifest and icons, and serves everything stale-while-revalidate, so a
 redeploy appears on the visit after the one that downloads it. Progress, effort
 and difficulty choices live in localStorage as before. Opening a page from disk
-(`file://`) simply skips the service worker. Restyle the icon with
+(`file://`) simply skips the service worker. On phones (width up to 760 px) the table becomes one card per day, the page
+itself scrolls, controls stack with 44 px touch targets and 16 px inputs (so iOS
+doesn't zoom on focus), the search/filter/export controls fold behind one button,
+and the layout respects the notch and home indicator (`viewport-fit=cover`). A
+floating **Today** button jumps to today's learning, and the installed app opens
+there automatically. Restyle the icon with
 `python make_icons.py`; bump `CACHE` in `sw.js` only to purge old files.

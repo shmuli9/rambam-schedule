@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Rambam Yad — Learning Schedule</title>
 <link rel="manifest" href="../manifest.webmanifest">
 <meta name="theme-color" content="#1f4e79">
@@ -11,15 +11,23 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Rambam Yad">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
   :root { --grey:#d9d9d9; --blue:#ddebf7; --head:#1f4e79; }
-  * { box-sizing: border-box; }
-  body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; background:#f5f6f8; color:#222; }
-  header { background: var(--head); color:#fff; padding: 14px 20px; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; background:#f5f6f8; }
+  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; margin: 0;
+         background:#f5f6f8; color:#222; touch-action: manipulation; }
+  /* notch / home-indicator / landscape-rounded-corner safe areas */
+  :root { --sl: env(safe-area-inset-left, 0px); --sr: env(safe-area-inset-right, 0px);
+          --st: env(safe-area-inset-top, 0px); --sb: env(safe-area-inset-bottom, 0px); }
+  header { background: var(--head); color:#fff;
+           padding: calc(14px + var(--st)) calc(20px + var(--sr)) 14px calc(20px + var(--sl)); }
   header h1 { margin:0; font-size: 20px; }
   header .sub { opacity:.85; font-size: 13px; margin-top: 4px; }
   .controls { display:flex; flex-wrap:wrap; gap:10px; align-items:center;
-              padding: 10px 20px; background:#fff; border-bottom:1px solid #ddd;
+              padding: 10px calc(20px + var(--sr)) 10px calc(20px + var(--sl));
+              background:#fff; border-bottom:1px solid #ddd;
               position: sticky; top: 0; z-index: 5; }
   .controls input[type=search] { padding:6px 10px; border:1px solid #bbb; border-radius:4px;
               min-width: 240px; font-size:13px; }
@@ -36,8 +44,9 @@
               background:#fff; cursor:pointer; font-size:13px; }
   .controls button.primary { background: var(--head); color:#fff; border-color: var(--head); }
   .controls button.primary:hover { background:#163a5c; }
-  .wrap { padding: 0 20px 30px; }
-  .panel { background:#fff; border-bottom:1px solid #ddd; padding: 10px 20px 8px; }
+  .wrap { padding: 0 calc(20px + var(--sr)) calc(30px + var(--sb)) calc(20px + var(--sl)); }
+  .panel { background:#fff; border-bottom:1px solid #ddd;
+           padding: 10px calc(20px + var(--sr)) 8px calc(20px + var(--sl)); }
   .panel-head { display:flex; flex-wrap:wrap; align-items:baseline; gap:10px;
                 font-size:13px; margin-bottom:4px; }
   .panel-head strong { font-size:13px; }
@@ -61,6 +70,7 @@
   td.chk input { cursor:pointer; width:16px; height:16px; }
   tr.done td { background:#e6f4ea !important; color:#4a5a4f; }
   [hidden] { display:none !important; }
+  .controls .more { display: none; }
   .controls .progress { font-size:13px; color:#2e6b3f; font-weight:600; }
   td.note { min-width: 160px; }
   .he { color:#444; font-size: 12px; }
@@ -72,7 +82,72 @@
     .wrap { overflow-x: auto; }
     thead th { position: static; }
   }
+  /* phones: each day becomes a card, the page itself scrolls (no nested
+     scrollers), controls stack full-width with 44px touch targets, and inputs are
+     16px so iOS does not zoom the page on focus */
+  @media screen and (max-width: 760px) {
+    header h1 { font-size: 19px; }
+    .controls { position: static; gap: 8px; padding-top: 12px; padding-bottom: 12px; }
+    .controls label.effort { width: 100%; padding: 6px 10px; }
+    .controls label.effort > span { min-width: 76px; }
+    .controls label { font-size: 15px; }
+    .controls input[type=search], .controls select, .controls input[type=date],
+    .controls input[type=number], .controls button {
+      font-size: 16px; min-height: 44px; border-radius: 8px; }
+    .controls input[type=search] { width: 100%; min-width: 0; }
+    .controls input[type=date] { flex: 1; min-width: 0; }
+    .controls select { flex: 1 1 140px; min-width: 0; }
+    .controls input[type=range] { flex: 1; width: auto; min-width: 0; height: 32px; }
+    .controls input[type=number] { width: 84px; flex: none; }
+    .controls input[type=checkbox] { width: 22px; height: 22px; }
+    .controls button { padding: 0 16px; }
+    .controls .count { width: 100%; margin-left: 0; }
+    .controls .sec { display: none; }
+    .controls.show-more .sec { display: flex; }
+    .controls.show-more input.sec, .controls.show-more select.sec, .controls.show-more button.sec { display: block; }
+    .controls .more { display: block; width: 100%; }
+    .panel { padding-top: 8px; }
+    .wrap { overflow: visible; padding: 10px calc(12px + var(--sr)) calc(96px + var(--sb)) calc(12px + var(--sl)); }
+    table, tbody { display: block; background: transparent; }
+    thead { display: none; }
+    table tbody tr[data-type] {
+      display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px;
+      background: #fff; border: 1px solid #dbe1e7; border-radius: 14px;
+      padding: 12px 14px; margin: 0 0 10px; box-shadow: 0 1px 2px rgba(0,0,0,.05);
+      content-visibility: auto; contain-intrinsic-size: auto 190px;
+    }
+    table tbody tr[data-type] td { display: block; border: 0; padding: 0; background: transparent !important; }
+    table tbody tr[data-type] td:empty { display: none; }
+    table tbody tr.skip { background: var(--grey); box-shadow: none; padding: 8px 14px; }
+    table tbody tr.done { background: #e6f4ea; border-color: #bfdcc7; }
+    table tbody tr.transition { background: var(--blue); border-color: #b7d0e6; }
+    tr.skip td { font-style: italic; }
+    td.chk { order: -1; margin-right: 6px; align-self: center; }
+    td.chk input { width: 26px; height: 26px; }
+    td:nth-child(2)::before { content: 'Day '; }
+    td:nth-child(2) { font-weight: 700; font-size: 15px; }
+    td:nth-child(3), td:nth-child(4) { font-size: 14px; color: #444; }
+    td:nth-child(5) { margin-left: auto; font-size: 13px; color: #444; }
+    td:nth-child(6) { flex-basis: 100%; margin-top: 8px; font-size: 12px; color: #666; }
+    td:nth-child(7) { flex-basis: 100%; font-weight: 600; font-size: 16px; }
+    td.learning { flex-basis: 100%; min-width: 0; margin-top: 6px; font-size: 15px; line-height: 1.45; }
+    td:nth-child(n+8):nth-child(-n+12):not(.learning) {
+      order: 1; flex: 1 1 0; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(0,0,0,.08);
+      font-size: 14px; }
+    td:nth-child(8) { flex-grow: 2; }
+    td:nth-child(8)::before { content: 'Weight'; }
+    td:nth-child(10)::before { content: 'Halachot'; }
+    td:nth-child(11)::before { content: 'Words'; }
+    td:nth-child(12)::before { content: 'Effort'; }
+    td:nth-child(8)::before, td:nth-child(10)::before, td:nth-child(11)::before,
+    td:nth-child(12)::before { display: block; font-size: 11px; color: #777; text-transform: uppercase; letter-spacing: .03em; }
+    td.note { order: 2; flex-basis: 100%; min-width: 0; margin-top: 6px; font-size: 13px; color: #1f4e79; }
+    tr.skip td.note { margin-top: 0; color: #707070; }
+    #todayBtn { position: fixed; right: calc(16px + var(--sr)); bottom: calc(16px + var(--sb)); z-index: 20;
+      min-height: 48px; padding: 0 20px; border-radius: 24px; box-shadow: 0 4px 14px rgba(0,0,0,.28); }
+  }
   @media print {
+    #todayBtn { display: none !important; }
     @page { size: A4 landscape; margin: 10mm; }
     body { background:#fff; }
     .controls, .panel, header .sub button { display: none !important; }
@@ -107,25 +182,27 @@
   <label class="effort" title="Effort = words × difficulty weight. Higher = more per day = fewer days.">
     <span>Effort/day</span>
     <input type="range" id="effort" min="250" max="3000" step="10" value="788">
-    <input type="number" id="effortNum" min="50" max="20000" step="10" value="788">
+    <input type="number" inputmode="numeric" id="effortNum" min="50" max="20000" step="10" value="788">
   </label>
   <label class="effort" id="wsetLabel" hidden title="Which difficulty weighting sets each day's load. Hand weights are subjective; the commentary options blend in how much the classical meforshim wrote on each hilchot. Total effort is kept equal, so the effort/day scale is comparable.">
     <span>Difficulty</span>
     <select id="wset"></select>
   </label>
-  <input type="search" id="q" placeholder="Search (hilchot, perek, date, reason…)">
-  <select id="sefer"><option value="">All sefarim</option><option value="Introduction">Introduction</option><option value="Sefer Madda">Sefer Madda</option><option value="Sefer Ahavah">Sefer Ahavah</option><option value="Sefer Zemanim">Sefer Zemanim</option><option value="Sefer Nashim">Sefer Nashim</option><option value="Sefer Kedushah">Sefer Kedushah</option><option value="Sefer Haflaah">Sefer Haflaah</option><option value="Sefer Zeraim">Sefer Zeraim</option><option value="Sefer Avodah">Sefer Avodah</option><option value="Sefer Korbanot">Sefer Korbanot</option><option value="Sefer Taharah">Sefer Taharah</option><option value="Sefer Nezikim">Sefer Nezikim</option><option value="Sefer Kinyan">Sefer Kinyan</option><option value="Sefer Mishpatim">Sefer Mishpatim</option><option value="Sefer Shoftim">Sefer Shoftim</option></select>
-  <select id="type">
+  <input type="search" class="sec" id="q" placeholder="Search (hilchot, perek, date, reason…)">
+  <select id="sefer" class="sec"><option value="">All sefarim</option><option value="Introduction">Introduction</option><option value="Sefer Madda">Sefer Madda</option><option value="Sefer Ahavah">Sefer Ahavah</option><option value="Sefer Zemanim">Sefer Zemanim</option><option value="Sefer Nashim">Sefer Nashim</option><option value="Sefer Kedushah">Sefer Kedushah</option><option value="Sefer Haflaah">Sefer Haflaah</option><option value="Sefer Zeraim">Sefer Zeraim</option><option value="Sefer Avodah">Sefer Avodah</option><option value="Sefer Korbanot">Sefer Korbanot</option><option value="Sefer Taharah">Sefer Taharah</option><option value="Sefer Nezikim">Sefer Nezikim</option><option value="Sefer Kinyan">Sefer Kinyan</option><option value="Sefer Mishpatim">Sefer Mishpatim</option><option value="Sefer Shoftim">Sefer Shoftim</option></select>
+  <select id="type" class="sec">
     <option value="">All rows</option>
     <option value="learn">Learning days only</option>
     <option value="skip">Skipped days only</option>
   </select>
-  <label><input type="checkbox" id="hideSkips"> Hide skipped days</label>
-  <button id="reset">Reset</button>
+  <label class="sec"><input type="checkbox" id="hideSkips"> Hide skipped days</label>
+  <button id="moreBtn" class="more" aria-expanded="false">Search, filter &amp; export</button>
+  <button id="todayBtn" class="primary" title="Scroll to today's learning">Today</button>
+  <button id="reset" class="sec">Reset</button>
   <span class="progress" id="progress"></span>
   <button id="clearDone" title="Forget all completed days (stored only in this browser)" hidden>Clear progress</button>
-  <button id="ics" class="primary" title="Download an .ics file of the current pace — import into Apple Calendar, Gmail, Outlook, etc.">📅 Export .ics</button>
-  <span class="count" id="count"></span>
+  <button id="ics" class="primary sec" title="Download an .ics file of the current pace — import into Apple Calendar, Gmail, Outlook, etc.">📅 Export .ics</button>
+  <span class="count sec" id="count"></span>
 </div>
 <div class="panel" id="distPanel">
   <div class="panel-head">
@@ -787,8 +864,39 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     distToggle.textContent = collapsed ? 'Show' : 'Hide';
   });
 
+  /* ---- jump to today ------------------------------------------------- */
+  function todayIso() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function scrollToToday(smooth) {
+    const t = todayIso();
+    let best = null, last = null;
+    for (const tr of domRows) {
+      if (tr.dataset.type !== 'learn' || tr.style.display === 'none') continue;
+      last = tr;
+      if (!best && tr.cells[2].dataset.v >= t && !tr.classList.contains('done')) best = tr;
+    }
+    const target = best || last;
+    if (target) target.scrollIntoView({ block: 'center', behavior: smooth ? 'smooth' : 'auto' });
+  }
+  document.getElementById('todayBtn').addEventListener('click', () => scrollToToday(true));
+
+  document.getElementById('moreBtn').addEventListener('click', e => {
+    const open = e.currentTarget.closest('.controls').classList.toggle('show-more');
+    e.currentTarget.setAttribute('aria-expanded', open);
+  });
+  /* phones: start with the histogram folded away so the schedule is what you see */
+  if (window.matchMedia && matchMedia('(max-width: 760px)').matches) {
+    distPanel.classList.add('collapsed'); distToggle.textContent = 'Show';
+  }
+
   loadPrefs();
   rebuild();
+  /* launched from the home screen: open on today's learning like a native app */
+  if ((window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone) {
+    requestAnimationFrame(() => scrollToToday(false));
+  }
 })();
 </script>
 <script>

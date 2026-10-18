@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Rambam Yad — Learning Schedule</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#1f4e79">
@@ -11,14 +11,18 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Rambam Yad">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
   :root { --head:#1f4e79; --line:#cfd6dd; }
-  * { box-sizing: border-box; }
-  body { margin:0; font-family:"Segoe UI", Arial, sans-serif; background:#f5f6f8; color:#222; }
-  header { background:var(--head); color:#fff; padding:18px 24px; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { -webkit-text-size-adjust: 100%; background:#f5f6f8; }
+  body { margin:0; font-family:system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; touch-action: manipulation; background:#f5f6f8; color:#222; }
+  header { background:var(--head); color:#fff;
+           padding: calc(18px + env(safe-area-inset-top, 0px)) calc(24px + env(safe-area-inset-right, 0px)) 18px calc(24px + env(safe-area-inset-left, 0px)); }
   header h1 { margin:0; font-size:22px; }
   header .sub { opacity:.85; font-size:13px; margin-top:6px; }
-  main { max-width: 900px; margin: 0 auto; padding: 24px; }
+  main { max-width: 900px; margin: 0 auto;
+         padding: 24px calc(24px + env(safe-area-inset-right, 0px)) 24px calc(24px + env(safe-area-inset-left, 0px)); }
   .card { background:#fff; border:1px solid var(--line); border-radius:8px;
           padding:16px 18px; margin-bottom:16px; }
   .card h2 { margin:0 0 4px; font-size:17px; }
@@ -26,13 +30,14 @@
   .card h2 a:hover { text-decoration:underline; }
   .card .meta { font-size:13px; color:#555; margin-bottom:10px; }
   .links { display:flex; flex-wrap:wrap; gap:8px; }
-  .links a { font-size:13px; text-decoration:none; padding:6px 10px; border:1px solid var(--line);
+  .links a { font-size:13px; text-decoration:none; padding:10px 14px; min-height:40px; border:1px solid var(--line);
              border-radius:4px; background:#fbfcfd; color:#22405c; }
   .links a.primary { background:var(--head); color:#fff; border-color:var(--head); }
   .links a:hover { border-color:var(--head); }
   ul.notes { font-size:13px; color:#444; line-height:1.55; padding-left:20px; }
   code { background:#eef1f4; padding:1px 4px; border-radius:3px; font-size:12px; }
-  footer { font-size:12px; color:#666; text-align:center; padding: 10px 0 30px; }
+  footer { font-size:12px; color:#666; text-align:center; padding: 10px 0 calc(30px + env(safe-area-inset-bottom, 0px)); }
+  @media (max-width: 520px) { main { padding-top: 16px; padding-bottom: 8px; } .card { padding: 14px; } }
 </style>
 </head>
 <body>
