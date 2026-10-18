@@ -1128,10 +1128,10 @@ def write_html(entries, params, out_path):
     .wrap { overflow-x: auto; }
     thead th { position: static; }
   }
-  /* phones: each day becomes a card, the page itself scrolls (no nested
+  /* phones and tablets (narrow or touch-only up to 1024px, so landscape phones too): each day becomes a card, the page itself scrolls (no nested
      scrollers), controls stack full-width with 44px touch targets, and inputs are
      16px so iOS does not zoom the page on focus */
-  @media screen and (max-width: 760px) {
+  @media screen and (max-width: 760px), screen and (pointer: coarse) and (max-width: 1024px) {
     header h1 { font-size: 19px; }
     .controls { position: static; gap: 8px; padding-top: 12px; padding-bottom: 12px; }
     .controls label.effort { width: 100%; padding: 6px 10px; }
@@ -1927,7 +1927,7 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     e.currentTarget.setAttribute('aria-expanded', open);
   });
   /* phones: start with the histogram folded away so the schedule is what you see */
-  if (window.matchMedia && matchMedia('(max-width: 760px)').matches) {
+  if (window.matchMedia && matchMedia('(max-width: 760px), (pointer: coarse) and (max-width: 1024px)').matches) {
     distPanel.classList.add('collapsed'); distToggle.textContent = 'Show';
   }
 
@@ -1943,6 +1943,10 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
 /* PWA: offline + installable (only when served over http(s); the service worker
    and manifest live one level up, next to index.html) */
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  var hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', function () {
+    if (hadController) location.reload();   // a new version just took over
+  });
   navigator.serviceWorker.register('../sw.js').catch(function () {});
 }
 </script>

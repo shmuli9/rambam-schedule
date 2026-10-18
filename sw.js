@@ -1,12 +1,12 @@
 /* Service worker for the Rambam Yad schedule PWA.
  *
  * The schedule pages are self-contained, so the app is just a handful of
- * files.  Strategy: precache them on install, then serve every same-origin GET
- * stale-while-revalidate -- instant and offline-capable, and a redeploy shows up
- * on the next visit after the one that fetched it.  Bump CACHE only to purge
- * old files.  Paths are relative so it works under a GitHub Pages sub-path.
+ * files.  Strategy: precache them on install; pages (navigations) are
+ * network-first, bypassing the browser's HTTP cache, so a redeploy is picked up
+ * immediately and the cached copy is only the offline fallback; everything else
+ * is stale-while-revalidate.  Bump CACHE to purge old files.  Paths are relative so it works under a GitHub Pages sub-path.
  */
-const CACHE = 'rambam-yad-v1';
+const CACHE = 'rambam-yad-v2';
 const PRECACHE = [
   './',
   './index.html',
@@ -34,6 +34,18 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
+  if (req.mode === 'navigate') {
+    e.respondWith(
+      fetch(req, { cache: 'reload' })
+        .then(res => {
+          if (res && res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
+          return res;
+        })
+        .catch(() => caches.match(req, { ignoreSearch: true })
+          .then(hit => hit || caches.match('./index.html')))
+    );
+    return;
+  }
   e.respondWith(
     caches.open(CACHE).then(cache =>
       cache.match(req, { ignoreSearch: true }).then(hit => {

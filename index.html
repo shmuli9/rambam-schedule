@@ -114,6 +114,10 @@
 <script>
 /* PWA: offline + installable (only when served over http(s)) */
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  var hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', function () {
+    if (hadController) location.reload();   // a new version just took over
+  });
   navigator.serviceWorker.register('sw.js').catch(function () {});
 }
 </script>
