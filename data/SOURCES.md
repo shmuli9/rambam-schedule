@@ -51,6 +51,7 @@ attempted. **If continuing:** only via a manual export by the user (PDFs of
 specific sefarim -> page count or OCR per hilchot), most valuable for Maggid
 Mishneh's 58 missing hilchot.
 
-## Not done / ideas
-- A "consistent core basket" variant (Kessef Mishneh, Kiryat Sefer, Ohr Sameach,
-  Mishneh LaMelech: 67-82 hilchot each) to compare with the 39-author basket.
+## Done from the original ideas
+- Core basket (Kessef Mishneh, Kiryat Sefer, Ohr Sameach, Mishneh LaMelech) is
+  built from the same `commentary.json` -- no extra fetching. See
+  `CORE_BASKET` in `generate_schedule.py`.

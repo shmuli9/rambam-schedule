@@ -59,8 +59,14 @@ def load_weights(path):
     return weights
 
 
+# A deliberately small, evenly-spread basket: the four commentators who each
+# cover 67-82 of the 84 hilchot, so (almost) every hilchot is scored by the same
+# voices.  Compare with the full 39-commentator basket in the HTML.
+CORE_BASKET = ["Kessef Mishneh", "Kiryat Sefer", "Ohr Sameach", "Mishneh LaMelech"]
+
+
 def compute_proxy_weights(commentary_path, hand_weights, alpha=0.5, coverage_min=0.25,
-                          min_commentators=3, effort_neutral=True):
+                          min_commentators=3, effort_neutral=True, basket=None):
     """Blend the hand-tuned weights with a commentary-density difficulty proxy.
 
     The proxy for a hilchot is its *commentary density* -- total words written
@@ -93,6 +99,10 @@ def compute_proxy_weights(commentary_path, hand_weights, alpha=0.5, coverage_min
     (which --budget controls).  Set effort_neutral=False to let the blend set
     its own pace.
 
+    basket -- optional list of commentator names to restrict the proxy to (e.g.
+    CORE_BASKET); None uses every commentator in commentary.json.  The
+    min_commentators gate then counts only commentators from this list.
+
     Returns (weights_dict, rows) where weights_dict is slug -> (weight,
     rationale) ready to hand to load_entries, and rows is a list of per-hilchot
     detail dicts for data/proxy_weights.csv.
@@ -108,12 +118,15 @@ def compute_proxy_weights(commentary_path, hand_weights, alpha=0.5, coverage_min
     H = com.get("hilchot", {})
     if not H:
         return dict(hand_weights), []
-    basket_size = len(com.get("basket") or [])
+    only = set(basket) if basket else None
+    basket_size = len(only) if only else len(com.get("basket") or [])
 
     # Per-meforshim geometric mean of (commentary words / Rambam words).
     mef_set = set()
     for r in H.values():
         mef_set.update(r.get("meforshim", {}).keys())
+    if only:
+        mef_set &= only
     G = {}
     for m in mef_set:
         ratios = []
@@ -129,14 +142,21 @@ def compute_proxy_weights(commentary_path, hand_weights, alpha=0.5, coverage_min
     raw, cov, dens, ncmt = {}, {}, {}, {}
     for slug, r in H.items():
         contribs = []
+        rw = r.get("rambam_words", 0)
         for m, mr in r.get("meforshim", {}).items():
-            rw = r.get("rambam_words", 0)
+            if only and m not in only:
+                continue
             if mr.get("present") and mr.get("words", 0) > 0 and m in G and rw > 0:
                 contribs.append((mr["words"] / rw) / G[m])
         raw[slug] = (sum(contribs) / len(contribs)) if contribs else 0.0
         cov[slug] = r.get("coverage", 0.0)
-        dens[slug] = r.get("density", 0.0)
-        ncmt[slug] = r.get("commentators", len(contribs))
+        if only:
+            dens[slug] = (sum(mr["words"] for m, mr in r.get("meforshim", {}).items()
+                              if m in only and mr.get("present")) / rw) if rw else 0.0
+            ncmt[slug] = len(contribs)
+        else:
+            dens[slug] = r.get("density", 0.0)
+            ncmt[slug] = r.get("commentators", len(contribs))
 
     vals = [v for v in raw.values() if v > 0]
     G_raw = math.exp(sum(math.log(v) for v in vals) / len(vals)) if vals else 1.0
@@ -280,6 +300,7 @@ def load_entries(data_file=DATA_FILE, weights=None, splits=None):
                         unit_words.append(h_words)
                         units.append({"halacha": h_no, "part": None})
                 entries.append({
+                    "slug": hil["slug"],
                     "sefer_en": sefer["name_en"],
                     "sefer_he": sefer["name_he"] or "",
                     "hil_en": hil_en,
@@ -939,6 +960,7 @@ def write_html(entries, params, out_path):
     #   DAYS     [[iso, hebrew_date, reason_idx]]   (reason 0 = learning day)
     sefarim, sef_idx = [], {}
     hilchot, hil_idx = [], {}
+    hil_slug = []
     perakim = []
     for e in entries:
         skey = (e["sefer_en"], e["sefer_he"])
@@ -949,6 +971,7 @@ def write_html(entries, params, out_path):
         if hkey not in hil_idx:
             hil_idx[hkey] = len(hilchot)
             hilchot.append(list(hkey))
+            hil_slug.append(e["slug"])
         rec = [hil_idx[hkey], e["perek"],
                ",".join(str(w) for w in e["halacha_words"]),
                e["weight"]]
@@ -999,6 +1022,13 @@ def write_html(entries, params, out_path):
         s = _json.dumps(obj, ensure_ascii=False, separators=(",", ":"))
         return s.replace("</", "<\\/")   # safe inside <script>
 
+    # Alternative difficulty weightings the page can switch between:
+    #   WSETS [{id, label, w: [weight per HILCHOT index]}]
+    wsets = [{"id": ws["id"], "label": ws["label"],
+              "w": [round(ws["w"].get(sl, 1.0), 4) for sl in hil_slug]}
+             for ws in params.get("weight_sets") or []]
+    default_set = params.get("default_set") or (wsets[0]["id"] if wsets else "")
+
     budget = float(params["budget"])
     effort_max = int(max(3000, round(budget * 2.5 / 100) * 100))
     loc = "Diaspora (UK)" if params["diaspora"] else "Israel"
@@ -1007,6 +1037,8 @@ def write_html(entries, params, out_path):
         f"const SEFARIM = {dump(sefarim)};\n"
         f"const HILCHOT = {dump(hilchot)};\n"
         f"const PERAKIM = {dump(perakim)};\n"
+        f"const WSETS = {dump(wsets)};\n"
+        f"const DEFAULT_SET = {dump(default_set)};\n"
         f"const REASONS = {dump(reasons)};\n"
         f"const DAYS = {dump(day_rows)};"
     )
@@ -1065,6 +1097,7 @@ def write_html(entries, params, out_path):
   td.chk { text-align:center; }
   td.chk input { cursor:pointer; width:16px; height:16px; }
   tr.done td { background:#e6f4ea !important; color:#4a5a4f; }
+  [hidden] { display:none !important; }
   .controls .progress { font-size:13px; color:#2e6b3f; font-weight:600; }
   td.note { min-width: 160px; }
   .he { color:#444; font-size: 12px; }
@@ -1112,6 +1145,10 @@ def write_html(entries, params, out_path):
     <span>Effort/day</span>
     <input type="range" id="effort" min="@@MIN_EFFORT@@" max="@@EFFORT_MAX@@" step="10" value="@@DEFAULT@@">
     <input type="number" id="effortNum" min="50" max="20000" step="10" value="@@DEFAULT@@">
+  </label>
+  <label class="effort" id="wsetLabel" hidden title="Which difficulty weighting sets each day's load. Hand weights are subjective; the commentary options blend in how much the classical meforshim wrote on each hilchot. Total effort is kept equal, so the effort/day scale is comparable.">
+    <span>Difficulty</span>
+    <select id="wset"></select>
   </label>
   <input type="search" id="q" placeholder="Search (hilchot, perek, date, reason…)">
   <select id="sefer"><option value="">All sefarim</option>@@SEFER_OPTS@@</select>
@@ -1176,6 +1213,7 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
   const effortRange = document.getElementById('effort');
   const effortNum = document.getElementById('effortNum');
   const startDate = document.getElementById('startDate');
+  const wsetSel = document.getElementById('wset');
   const statsEl = document.getElementById('stats');
   const progressEl = document.getElementById('progress');
   const clearBtn = document.getElementById('clearDone');
@@ -1676,12 +1714,28 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     setTimeout(() => URL.revokeObjectURL(a.href), 5000);
   }
 
+  /* ---- difficulty weighting (hand vs commentary-density proxies) ----- */
+  let wsetId = DEFAULT_SET;
+  function applyWeightSet(id) {
+    const ws = WSETS.find(x => x.id === id);
+    if (!ws) return false;
+    wsetId = id;
+    PERAKIM.forEach(p => { p[3] = ws.w[p[0]]; });
+    wsetSel.value = id;
+    return true;
+  }
+  if (WSETS.length > 1) {
+    wsetSel.innerHTML = WSETS.map(w => '<option value="' + esc(w.id) + '">' + esc(w.label) + '</option>').join('');
+    document.getElementById('wsetLabel').hidden = false;
+    applyWeightSet(DEFAULT_SET);
+  }
+
   /* ---- wiring ------------------------------------------------------- */
   /* last effort / start the user chose, restored on reload */
   const PREFS_KEY = 'rambam-yad-prefs-v1';
   function savePrefs() {
     try {
-      localStorage.setItem(PREFS_KEY, JSON.stringify({ effort: effortNum.value, start: startDate.value }));
+      localStorage.setItem(PREFS_KEY, JSON.stringify({ effort: effortNum.value, start: startDate.value, wset: wsetId }));
     } catch (e) { /* ignore */ }
   }
   function loadPrefs() {
@@ -1691,6 +1745,7 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
       const e = parseFloat(d.effort);
       if (e >= 50 && e <= 20000) effortNum.value = e;
       if (/^\d{4}-\d{2}-\d{2}$/.test(d.start || '')) startDate.value = d.start;
+      if (d.wset && WSETS.length > 1) applyWeightSet(d.wset);
       updateBudgetLabel();
     } catch (e) { /* ignore */ }
   }
@@ -1708,6 +1763,7 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
 
   effortRange.addEventListener('input', () => { effortNum.value = effortRange.value; scheduleRebuild(); });
   effortNum.addEventListener('input', scheduleRebuild);
+  wsetSel.addEventListener('change', () => { applyWeightSet(wsetSel.value); scheduleRebuild(); });
   startDate.addEventListener('input', scheduleRebuild);
   startDate.addEventListener('change', scheduleRebuild);
   ths.forEach((th, i) => th.addEventListener('click', () => {
@@ -1722,6 +1778,7 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     q.value = ''; seferSel.value = ''; typeSel.value = ''; hideSkips.checked = false;
     effortNum.value = DEFAULT_EFFORT; effortRange.value = DEFAULT_EFFORT;
     startDate.value = DEFAULT_START;
+    if (WSETS.length > 1) applyWeightSet(DEFAULT_SET);
     savePrefs();
     sortCol = -1; sortDir = 1;
     ths.forEach(th => { const a = th.querySelector('.arrow'); if (a) a.remove(); });
@@ -1797,6 +1854,10 @@ def main():
                          "(data/commentary.json; run fetch_commentary.py first)")
     ap.add_argument("--proxy-blend", type=float, default=0.5,
                     help="Blend exponent: composite = hand^(1-a) * proxy^a (default 0.5)")
+    ap.add_argument("--proxy-basket", choices=["all", "core"], default="all",
+                    help="Commentators the --proxy uses: 'all' = the 39-commentator "
+                         "basket, 'core' = the four with near-complete coverage "
+                         "(Kessef Mishneh, Kiryat Sefer, Ohr Sameach, Mishneh LaMelech)")
     ap.add_argument("--coverage-min", type=float, default=0.25,
                     help="Min fraction of attempted commentary nodes that must return "
                          "usable text -- a fetch data-quality gate, not a difficulty "
@@ -1845,32 +1906,55 @@ def main():
     weights = None if args.no_weights else load_weights(args.weights)
     splits = None if args.no_splits else load_splits(args.splits)
     proxy_rows = None
-    if args.proxy:
-        if weights is None:
-            print("WARNING: --proxy given but --no-weights set; ignoring proxy.")
-        else:
-            weight_names = {}
-            with open(args.weights, encoding="utf-8-sig", newline="") as f:
-                for row in csv.DictReader(f):
-                    weight_names[row["slug"]] = {
-                        "sefer_en": row.get("sefer_en", ""),
-                        "hilchot_en": row.get("hilchot_en", ""),
-                    }
-            weights, proxy_rows = compute_proxy_weights(
-                args.commentary, weights, args.proxy_blend, args.coverage_min,
-                min_commentators=args.proxy_min_commentators,
-                effort_neutral=not args.no_proxy_effort_neutral)
-            pc = os.path.join(os.path.dirname(os.path.abspath(args.weights)),
-                             "proxy_weights.csv")
-            write_proxy_csv(proxy_rows, pc, weight_names)
-            n_proxy = sum(1 for r in proxy_rows if r['source'] == 'proxy')
-            ncm = sorted(r['commentators'] for r in proxy_rows if r['source'] == 'proxy')
-            print(f"Proxy blended (alpha={args.proxy_blend}, "
-                  f"commentators>={args.proxy_min_commentators}, "
-                  f"coverage>={args.coverage_min}); wrote {pc} "
-                  f"({n_proxy} hilchot use proxy, {len(proxy_rows) - n_proxy} hand-only"
-                  + (f"; commentators median {ncm[len(ncm) // 2]}, "
-                     f"range {ncm[0]}-{ncm[-1]}" if ncm else "") + ")")
+    hand_weights = weights
+    weight_names = {}
+    if weights is not None and os.path.exists(args.weights):
+        with open(args.weights, encoding="utf-8-sig", newline="") as f:
+            for row in csv.DictReader(f):
+                weight_names[row["slug"]] = {
+                    "sefer_en": row.get("sefer_en", ""),
+                    "hilchot_en": row.get("hilchot_en", ""),
+                }
+    data_dir = os.path.dirname(os.path.abspath(args.weights))
+
+    def proxy_set(basket):
+        return compute_proxy_weights(
+            args.commentary, hand_weights, args.proxy_blend, args.coverage_min,
+            min_commentators=args.proxy_min_commentators,
+            effort_neutral=not args.no_proxy_effort_neutral, basket=basket)
+
+    # Every weighting the HTML can switch between (hand is always first).
+    weight_sets, default_set = [], "hand"
+    if hand_weights is not None:
+        weight_sets.append({"id": "hand", "label": "Hand weights",
+                            "w": {k: v[0] for k, v in hand_weights.items()}})
+        if os.path.exists(args.commentary):
+            for sid, label, basket, csv_name in (
+                    ("all", "Hand × commentary (39 commentators)", None,
+                     "proxy_weights.csv"),
+                    ("core", "Hand × core commentary (4 commentators)", CORE_BASKET,
+                     "proxy_weights_core.csv")):
+                w_set, rows = proxy_set(basket)
+                if not rows:
+                    continue
+                write_proxy_csv(rows, os.path.join(data_dir, csv_name), weight_names)
+                weight_sets.append({"id": sid, "label": label,
+                                    "w": {k: v[0] for k, v in w_set.items()},
+                                    "n_proxy": sum(1 for r in rows if r["source"] == "proxy")})
+                if args.proxy and args.proxy_basket == sid:
+                    weights, proxy_rows = w_set, rows
+                    default_set = sid
+                    n_proxy = weight_sets[-1]["n_proxy"]
+                    ncm = sorted(r['commentators'] for r in rows if r['source'] == 'proxy')
+                    print(f"Proxy blended (basket={sid}, alpha={args.proxy_blend}, "
+                          f"commentators>={args.proxy_min_commentators}, "
+                          f"coverage>={args.coverage_min}); wrote "
+                          f"{os.path.join(data_dir, csv_name)} "
+                          f"({n_proxy} hilchot use proxy, {len(rows) - n_proxy} hand-only"
+                          + (f"; commentators median {ncm[len(ncm) // 2]}, "
+                             f"range {ncm[0]}-{ncm[-1]}" if ncm else "") + ")")
+    elif args.proxy:
+        print("WARNING: --proxy given but --no-weights set; ignoring proxy.")
     if splits:
         specs = [spec for part_splits in splits.values()
                  for h in part_splits.values() for spec in h.values()]
@@ -1896,6 +1980,7 @@ def main():
               "max_perakim": args.max_perakim, "min_split_words": args.min_split,
               "diaspora": diaspora, "min_effort": args.min_effort,
               "window_start": window_start, "latest_start": latest_start,
+              "weight_sets": weight_sets, "default_set": default_set,
               "proxy": args.proxy and weights is not None,
               "proxy_blend": args.proxy_blend,
               "proxy_min_commentators": args.proxy_min_commentators,

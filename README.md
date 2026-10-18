@@ -92,7 +92,22 @@ don't all write on the same hilchot, so each hilchot is scored only by those who
 actually wrote on it, each measured against their own average. A hilchot nobody
 commented on scores as *average*, not as easy.
 
-Enable it with `--proxy`:
+**Core basket.** Because the 39-commentator basket scores each hilchot with a
+different set of voices, there is also a *core* basket of the four commentators
+who each cover 67-82 hilchot (Kessef Mishneh, Kiryat Sefer, Ohr Sameach, Mishneh
+LaMelech), so almost every hilchot is judged by the same four. 80 hilchot have at
+least 3 of them (Eruvin, Sheqel Dues and Leprosy defilement fall back to the hand
+weight). It agrees only moderately with the full basket (Spearman 0.73) and, like
+it, hardly at all with the hand weights. Use `--proxy --proxy-basket core`
+(weights in `data/proxy_weights_core.csv`).
+
+**In the HTML.** Both interactive pages have a *Difficulty* selector: hand
+weights, hand × commentary (39), or hand × core commentary (4). Switching it
+re-paces the remaining days (completed days are kept) so you can see how the
+schedule moves. Total effort is held equal across the options, so the
+effort/day scale stays comparable. The choice is remembered in localStorage.
+
+Enable it for the static XLSX/PDF/ICS outputs with `--proxy`:
 
 ```bash
 python fetch_commentary.py              # one-off; writes data/commentary.json
