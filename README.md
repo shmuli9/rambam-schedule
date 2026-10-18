@@ -206,6 +206,8 @@ remain the place to encode "this is mathematically dense".
 - `data/halacha_splits.json` — break points inside the handful of oversized
   single halachot that would otherwise swallow a whole day (see below).
 - `data/rambam.json` — cached Sefaria data.
+- `manifest.webmanifest`, `sw.js`, `icons/`, `make_icons.py` — make the site an
+  installable, offline-capable PWA (see below).
 - `index.html` — landing page (the GitHub Pages root) linking both interactive
   schedules and their XLSX/PDF/ICS downloads.
 - `output/rambam_schedule.xlsx` — Schedule sheet (one row per day) + Summary.
@@ -341,3 +343,14 @@ PDF Hebrew rendering uses `C:\Windows\Fonts\arial.ttf` (falls back to DejaVu).
   down to `--min-effort`. Pick a start date outside the range or an effort
   below the floor and the page tells you instead of quietly truncating.
 - Refresh Sefaria data: delete `data/rambam.json` and re-run `python fetch_data.py`.
+
+## Install as an app (PWA)
+
+Served over HTTPS (the GitHub Pages site) the pages can be installed from the
+browser's *Install* / *Add to Home Screen* menu and then work fully offline. The
+service worker (`sw.js`) precaches the landing page, both interactive schedules,
+the manifest and icons, and serves everything stale-while-revalidate, so a
+redeploy appears on the visit after the one that downloads it. Progress, effort
+and difficulty choices live in localStorage as before. Opening a page from disk
+(`file://`) simply skips the service worker. Restyle the icon with
+`python make_icons.py`; bump `CACHE` in `sw.js` only to purge old files.

@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Rambam Yad — Learning Schedule</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f4e79">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Rambam Yad">
 <style>
   :root { --head:#1f4e79; --line:#cfd6dd; }
   * { box-sizing: border-box; }
@@ -87,6 +94,8 @@
       <li>The interactive tables carry the perek/word/weight data and enough Hebrew calendar to
         re-pace themselves offline — they are one self-contained file each, no dependencies. The
         embedded calendar covers start dates from 11 Oct 2026 to 12 Feb 2030.</li>
+      <li><strong>Install it</strong> from your browser's menu (Install app / Add to Home
+        Screen) and it works offline like an app.</li>
       <li>In a schedule page use <strong>Export .ics</strong> for the pace you are looking at, or
         press <strong>Ctrl/Cmd+P</strong> for a landscape printout.</li>
       <li>Everything is regenerated with <code>python generate_schedule.py</code> —
@@ -97,5 +106,11 @@
 </main>
 <footer>Generated from the <a href="https://github.com/shmuli9/rambam-schedule">rambam-schedule</a>
   repository · word counts from <a href="https://www.sefaria.org">Sefaria</a></footer>
+<script>
+/* PWA: offline + installable (only when served over http(s)) */
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  navigator.serviceWorker.register('sw.js').catch(function () {});
+}
+</script>
 </body>
 </html>

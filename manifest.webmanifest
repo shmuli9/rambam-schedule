@@ -1,0 +1,21 @@
+{
+  "name": "Rambam Yad — Learning Schedule",
+  "short_name": "Rambam Yad",
+  "description": "Day-by-day Mishneh Torah learning schedule that re-paces itself to your effort level. Works offline.",
+  "id": "./",
+  "start_url": "./output/rambam_schedule.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f5f6f8",
+  "theme_color": "#1f4e79",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ],
+  "shortcuts": [
+    {"name": "Standard pace", "url": "./output/rambam_schedule.html"},
+    {"name": "Faster pace", "url": "./output/rambam_schedule_b1000.html"}
+  ]
+}

@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Rambam Yad — Learning Schedule</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#1f4e79">
+<link rel="icon" type="image/png" sizes="192x192" href="../icons/icon-192.png">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Rambam Yad">
 <style>
   :root { --grey:#d9d9d9; --blue:#ddebf7; --head:#1f4e79; }
   * { box-sizing: border-box; }
@@ -722,11 +729,11 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     } catch (e) { /* ignore */ }
   }
   let pending = null;
-  function scheduleRebuild() {
+  function scheduleRebuild(delay) {
     updateBudgetLabel();
     savePrefs();
     clearTimeout(pending);
-    pending = setTimeout(rebuild, 90);
+    pending = setTimeout(rebuild, typeof delay === 'number' ? delay : 90);
   }
   function updateBudgetLabel() {
     const v = parseFloat(effortNum.value);
@@ -734,10 +741,18 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
   }
 
   effortRange.addEventListener('input', () => { effortNum.value = effortRange.value; scheduleRebuild(); });
-  effortNum.addEventListener('input', scheduleRebuild);
+  /* typing: wait until the user pauses (a rebuild takes long enough to make
+     each keystroke freeze the page), and ignore half-typed values such as the
+     "1" of "1000"; leaving the box or pressing Enter applies it at once */
+  effortNum.addEventListener('input', () => {
+    if (!(parseFloat(effortNum.value) >= 50)) { clearTimeout(pending); return; }
+    scheduleRebuild(700);
+  });
+  effortNum.addEventListener('change', () => scheduleRebuild(0));
+  effortNum.addEventListener('keydown', e => { if (e.key === 'Enter') scheduleRebuild(0); });
   wsetSel.addEventListener('change', () => { applyWeightSet(wsetSel.value); scheduleRebuild(); });
-  startDate.addEventListener('input', scheduleRebuild);
-  startDate.addEventListener('change', scheduleRebuild);
+  startDate.addEventListener('input', () => scheduleRebuild());
+  startDate.addEventListener('change', () => scheduleRebuild());
   ths.forEach((th, i) => th.addEventListener('click', () => {
     if (sortCol === i) sortDir = -sortDir; else { sortCol = i; sortDir = 1; }
     sortRows(i);
@@ -775,6 +790,13 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
   loadPrefs();
   rebuild();
 })();
+</script>
+<script>
+/* PWA: offline + installable (only when served over http(s); the service worker
+   and manifest live one level up, next to index.html) */
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  navigator.serviceWorker.register('../sw.js').catch(function () {});
+}
 </script>
 </body>
 </html>
