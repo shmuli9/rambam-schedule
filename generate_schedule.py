@@ -1081,6 +1081,8 @@ def write_html(entries, params, out_path):
                 font-size:13px; margin-bottom:4px; }
   .panel-head strong { font-size:13px; }
   .panel-head .muted { color:#555; }
+  td.wcell { white-space:nowrap; }
+  td.wcell .hw { color:#888; font-size:11px; }
   .panel-head button { margin-left:auto; padding:4px 8px; border:1px solid #bbb;
                 border-radius:4px; background:#fff; cursor:pointer; font-size:12px; }
   #distChart svg { display:block; width:100%; height:auto; }
@@ -1541,7 +1543,8 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
       '<td dir="rtl" lang="he">' + esc(r.heb) + '</td>' +
       '<td>' + esc(r.sefer) + '</td>' +
       '<td>' + esc(r.hil) + '<br><span class="he" dir="rtl" lang="he">' + esc(r.hilHe) + '</span></td>' +
-      '<td data-v="' + r.weightAvg.toFixed(3) + '">' + esc(r.weightStr) + '</td>' +
+      '<td class="wcell" data-v="' + r.weightAvg.toFixed(3) + '">' +
+        r.items.map(it => itemWeight(it.p)).join('<br>') + '</td>' +
       '<td class="learning">' +
         r.items.map(it => esc(itemLabel(PERAKIM[it.p], PWORD[it.p], it.a, it.b))).join('<br>') +
       '</td>' +
@@ -1730,6 +1733,15 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     applyWeightSet(DEFAULT_SET);
   }
 
+  /* weight of one perek under the chosen weighting; when that differs from the
+     hand weight, the hand weight is shown alongside for comparison */
+  function itemWeight(p) {
+    const w = PERAKIM[p][3];
+    const hand = WSETS.find(x => x.id === 'hand');
+    const h = hand ? hand.w[PERAKIM[p][0]] : w;
+    return fmtW(w) + (Math.abs(h - w) >= 0.005 ? ' <span class="hw">(hand ' + fmtW(h) + ')</span>' : '');
+  }
+
   /* ---- wiring ------------------------------------------------------- */
   /* last effort / start the user chose, restored on reload */
   const PREFS_KEY = 'rambam-yad-prefs-v1';
@@ -1854,10 +1866,12 @@ def main():
                          "(data/commentary.json; run fetch_commentary.py first)")
     ap.add_argument("--proxy-blend", type=float, default=0.5,
                     help="Blend exponent: composite = hand^(1-a) * proxy^a (default 0.5)")
-    ap.add_argument("--proxy-basket", choices=["all", "core"], default="all",
+    ap.add_argument("--proxy-basket", choices=["all", "core", "core-only"], default="all",
                     help="Commentators the --proxy uses: 'all' = the 39-commentator "
                          "basket, 'core' = the four with near-complete coverage "
-                         "(Kessef Mishneh, Kiryat Sefer, Ohr Sameach, Mishneh LaMelech)")
+                         "(Kessef Mishneh, Kiryat Sefer, Ohr Sameach, Mishneh LaMelech); "
+                         "'core-only' = core with the hand weights ignored "
+                         "(hilchot lacking data still use their hand weight)")
     ap.add_argument("--coverage-min", type=float, default=0.25,
                     help="Min fraction of attempted commentary nodes that must return "
                          "usable text -- a fetch data-quality gate, not a difficulty "
@@ -1917,9 +1931,10 @@ def main():
                 }
     data_dir = os.path.dirname(os.path.abspath(args.weights))
 
-    def proxy_set(basket):
+    def proxy_set(basket, alpha=None):
         return compute_proxy_weights(
-            args.commentary, hand_weights, args.proxy_blend, args.coverage_min,
+            args.commentary, hand_weights,
+            args.proxy_blend if alpha is None else alpha, args.coverage_min,
             min_commentators=args.proxy_min_commentators,
             effort_neutral=not args.no_proxy_effort_neutral, basket=basket)
 
@@ -1929,12 +1944,14 @@ def main():
         weight_sets.append({"id": "hand", "label": "Hand weights",
                             "w": {k: v[0] for k, v in hand_weights.items()}})
         if os.path.exists(args.commentary):
-            for sid, label, basket, csv_name in (
-                    ("all", "Hand × commentary (39 commentators)", None,
+            for sid, label, basket, alpha, csv_name in (
+                    ("all", "Hand × commentary (39 commentators)", None, None,
                      "proxy_weights.csv"),
-                    ("core", "Hand × core commentary (4 commentators)", CORE_BASKET,
-                     "proxy_weights_core.csv")):
-                w_set, rows = proxy_set(basket)
+                    ("core", "Hand × core commentary (4 commentators)", CORE_BASKET, None,
+                     "proxy_weights_core.csv"),
+                    ("core-only", "Core commentary only (ignores hand weights)",
+                     CORE_BASKET, 1.0, "proxy_weights_core_only.csv")):
+                w_set, rows = proxy_set(basket, alpha)
                 if not rows:
                     continue
                 write_proxy_csv(rows, os.path.join(data_dir, csv_name), weight_names)
@@ -1946,7 +1963,7 @@ def main():
                     default_set = sid
                     n_proxy = weight_sets[-1]["n_proxy"]
                     ncm = sorted(r['commentators'] for r in rows if r['source'] == 'proxy')
-                    print(f"Proxy blended (basket={sid}, alpha={args.proxy_blend}, "
+                    print(f"Proxy blended (basket={sid}, alpha={args.proxy_blend if alpha is None else alpha}, "
                           f"commentators>={args.proxy_min_commentators}, "
                           f"coverage>={args.coverage_min}); wrote "
                           f"{os.path.join(data_dir, csv_name)} "

@@ -102,7 +102,11 @@ it, hardly at all with the hand weights. Use `--proxy --proxy-basket core`
 (weights in `data/proxy_weights_core.csv`).
 
 **In the HTML.** Both interactive pages have a *Difficulty* selector: hand
-weights, hand × commentary (39), or hand × core commentary (4). Switching it
+weights, hand × commentary (39), hand × core commentary (4), or *core commentary
+only* (ignores the hand weights entirely; hilchot with too little commentary data
+still use their hand weight, `--proxy-basket core-only`). Each row's Weight column
+shows the weight applied to every line of that day, with the hand weight in grey
+whenever it differs. Switching it
 re-paces the remaining days (completed days are kept) so you can see how the
 schedule moves. Total effort is held equal across the options, so the
 effort/day scale stays comparable. The choice is remembered in localStorage.
