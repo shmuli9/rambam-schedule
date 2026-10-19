@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, viewport-fit=cover">
 <title>Rambam Yad — Learning Schedule</title>
 <link rel="manifest" href="../manifest.webmanifest">
 <meta name="theme-color" content="#1f4e79">
@@ -16,6 +16,7 @@
   :root { --grey:#d9d9d9; --blue:#ddebf7; --head:#1f4e79; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; background:#f5f6f8; }
+  button, input, select { font-family: inherit; }
   body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; margin: 0;
          background:#f5f6f8; color:#222; touch-action: manipulation; }
   /* notch / home-indicator / landscape-rounded-corner safe areas */
@@ -86,6 +87,15 @@
      scrollers), controls stack full-width with 44px touch targets, and inputs are
      16px so iOS does not zoom the page on focus */
   @media screen and (max-width: 760px), screen and (pointer: coarse) and (max-width: 1024px) {
+    /* belt and braces for iOS: nothing may widen the page (a wider page makes
+       Safari zoom out and gives a sideways scroll) */
+    html, body { max-width: 100%; overflow-x: hidden; }
+    .controls input[type=date] { -webkit-appearance: none; appearance: none; display: block;
+      max-width: 100%; text-align: left; background: #fff; border: 1px solid #bbb; padding: 0 10px; }
+    .controls input[type=date]::-webkit-date-and-time-value { text-align: left; min-width: 0; }
+    .controls select { -webkit-appearance: none; appearance: none; max-width: 100%;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23555' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 12px center;
+      padding: 0 32px 0 10px; text-overflow: ellipsis; border: 1px solid #bbb; }
     header h1 { font-size: 19px; }
     .controls { position: static; gap: 8px; padding-top: 12px; padding-bottom: 12px; }
     .controls label.effort { width: 100%; padding: 6px 10px; }
@@ -881,6 +891,26 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     if (target) target.scrollIntoView({ block: 'center', behavior: smooth ? 'smooth' : 'auto' });
   }
   document.getElementById('todayBtn').addEventListener('click', () => scrollToToday(true));
+
+  /* open the page with #debug to see viewport/overflow diagnostics */
+  if (location.hash === '#debug') {
+    const box = document.createElement('pre');
+    box.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:99;margin:0;padding:6px;font:11px monospace;' +
+      'background:rgba(0,0,0,.85);color:#9f9;white-space:pre-wrap;max-height:45vh;overflow:auto';
+    const report = () => {
+      const W = document.documentElement.clientWidth, bad = [];
+      document.querySelectorAll('body *').forEach(el => {
+        const b = el.getBoundingClientRect();
+        if (b.width && b.right > W + 0.5 && getComputedStyle(el).display !== 'none')
+          bad.push(el.tagName + '#' + el.id + '.' + (el.className.baseVal === undefined ? el.className : '') + ' right=' + Math.round(b.right));
+      });
+      box.textContent = 'ui=phone-4 inner=' + innerWidth + ' client=' + W +
+        ' scrollW=' + document.documentElement.scrollWidth + ' scale=' + (visualViewport ? visualViewport.scale : '?') +
+        ' dpr=' + devicePixelRatio + ' coarse=' + matchMedia('(pointer: coarse)').matches +
+        '\noverflowing: ' + (bad.length ? '\n' + bad.slice(0, 10).join('\n') : 'none');
+    };
+    document.body.appendChild(box); report(); setInterval(report, 1500);
+  }
 
   document.getElementById('moreBtn').addEventListener('click', e => {
     const open = e.currentTarget.closest('.controls').classList.toggle('show-more');
