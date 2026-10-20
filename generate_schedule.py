@@ -1285,6 +1285,7 @@ def write_html(entries, params, out_path):
   <button id="reset" class="sec">Reset</button>
   <span class="progress" id="progress"></span>
   <button id="clearDone" title="Forget all completed days (stored only in this browser)" hidden>Clear progress</button>
+  <button id="offBtn" class="sec" hidden title="Keep the Hebrew text on this device so the day-by-day text works offline">&#11015; Save text offline</button>
   <button id="ics" class="primary sec" title="Download an .ics file of the current pace — import into Apple Calendar, Gmail, Outlook, etc.">📅 Export .ics</button>
   <span class="count sec" id="count"></span>
 </div>
@@ -1885,6 +1886,29 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
   }
   function sefariaUrl(it) { return 'https://www.sefaria.org/' + encodeURI(sefRef(it).ref) + '?lang=he'; }
 
+  /* Local copy first: texts/<slug>.json sits next to index.html and is cached by
+     the service worker, so it works offline and survives restarts. Sefaria's API
+     is only the fallback (e.g. a file:// copy of this page). */
+  const txFiles = new Map();
+  function textFile(slug) {
+    if (!txFiles.has(slug)) {
+      const pr = fetch('../texts/' + slug.replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '') + '.json')
+        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+      pr.catch(() => txFiles.delete(slug));
+      txFiles.set(slug, pr);
+    }
+    return txFiles.get(slug);
+  }
+  function loadItem(f) {
+    const slug = HSLUG[f.p[0]];
+    return textFile(slug).then(d => {
+      const per = d.t[FLAT.test(slug) ? 0 : f.p[1] - 1];
+      const hs = per && per.slice(f.lo - 1, f.hi);
+      if (!hs || hs.length !== f.hi - f.lo + 1) throw new Error('bad local text');
+      return hs;
+    }).catch(() => fetchText(f.ref));
+  }
+
   const txCache = new Map();
   function fetchText(ref) {
     if (!txCache.has(ref)) {
@@ -1939,7 +1963,7 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     txB.scrollTop = 0;
     r.items.forEach((it, i) => {
       const f = sefRef(it);
-      fetchText(f.ref).then(hs => {
+      loadItem(f).then(hs => {
         const box = document.getElementById('txt' + i), meta = document.getElementById('txm' + i);
         if (!box) return;
         box.innerHTML = hs.map((t, j) =>
@@ -1956,6 +1980,48 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
           ') \u2014 you need to be online. Use the Sefaria link above.</div>';
       });
     });
+  }
+
+  /* ---- offline copy of the text (Cache Storage; survives restarts) ----- */
+  const offBtn = document.getElementById('offBtn');
+  const TEXT_CACHE = 'rambam-texts-v1';
+  const textUrl = slug => '../texts/' + slug.replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '') + '.json';
+  let syncing = false;
+  async function syncTexts() {
+    if (syncing || !('caches' in window)) return;
+    syncing = true;
+    try {
+      try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { /* ignore */ }
+      const cache = await caches.open(TEXT_CACHE);
+      const slugs = Array.from(new Set(HSLUG));
+      const missing = [];
+      for (const s of slugs) if (!(await cache.match(textUrl(s)))) missing.push(s);
+      let have = slugs.length - missing.length;
+      const show = msg => { offBtn.textContent = msg; };
+      show(missing.length ? 'Saving text… ' + have + '/' + slugs.length : '✓ Text saved offline');
+      let failed = 0;
+      const queue = missing.slice();
+      await Promise.all([0, 1, 2, 3].map(async () => {
+        for (let s; (s = queue.shift()); ) {
+          try {
+            const r = await fetch(textUrl(s), { cache: 'reload' });
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            await cache.put(textUrl(s), r);
+            have++;
+            show('Saving text… ' + have + '/' + slugs.length);
+          } catch (e) { failed++; }
+        }
+      }));
+      show(failed ? '⬇ Save text offline (' + have + '/' + slugs.length + ', tap to retry)'
+                  : '✓ Text saved offline');
+    } finally { syncing = false; }
+  }
+  if ('caches' in window && /^https?:$/.test(location.protocol)) {
+    offBtn.hidden = false;
+    offBtn.addEventListener('click', syncTexts);
+    // quietly fetch it all once the page has settled, unless the user is saving data
+    const saver = navigator.connection && navigator.connection.saveData;
+    if (!saver) setTimeout(syncTexts, 4000);
   }
 
   /* ---- wiring ------------------------------------------------------- */

@@ -6,7 +6,11 @@
  * immediately and the cached copy is only the offline fallback; everything else
  * is stale-while-revalidate.  Bump CACHE to purge old files.  Paths are relative so it works under a GitHub Pages sub-path.
  */
-const CACHE = 'rambam-yad-v2';
+const CACHE = 'rambam-yad-v3';
+/* The Hebrew text (texts/*.json, ~12 MB, 3 MB gzipped) lives in its own cache:
+ * the page fills it in the background, it is read cache-first, and bumping CACHE
+ * never throws it away. */
+const TEXT_CACHE = 'rambam-texts-v1';
 const PRECACHE = [
   './',
   './index.html',
@@ -26,7 +30,7 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE && k !== TEXT_CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -34,6 +38,16 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
+  if (/\/texts\/[^/]+\.json$/.test(new URL(req.url).pathname)) {
+    e.respondWith(
+      caches.open(TEXT_CACHE).then(cache =>
+        cache.match(req, { ignoreSearch: true }).then(hit => hit || fetch(req).then(res => {
+          if (res && res.ok) cache.put(req, res.clone());
+          return res;
+        })))
+    );
+    return;
+  }
   if (req.mode === 'navigate') {
     e.respondWith(
       fetch(req, { cache: 'reload' })

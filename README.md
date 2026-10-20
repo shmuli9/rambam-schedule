@@ -187,6 +187,7 @@ remain the place to encode "this is mathematically dense".
 
 - `fetch_data.py` — downloads Rambam structure, per-perek halacha counts and
   per-halacha word counts from Sefaria into `data/rambam.json` (cached).
+- `fetch_text.py` — downloads the full Hebrew text into `texts/` (shown per day in the HTML, cached offline by the PWA).
 - `fetch_commentary.py` — discovers *every* classical Rambam commentary Sefaria
   links to each hilchot, downloads its Hebrew text and writes
   `data/commentary.json` (cached + resumable); the basis of the optional
@@ -359,3 +360,15 @@ and the layout respects the notch and home indicator (`viewport-fit=cover`). A
 floating **Today** button jumps to today's learning, and the installed app opens
 there automatically. Restyle the icon with
 `python make_icons.py`; bump `CACHE` in `sw.js` only to purge old files.
+
+### Hebrew text per day (and offline)
+
+Each day's reading is a link; tapping it opens the Hebrew text of exactly those
+halachot with **START**/**END** markers. The text comes from `texts/<hilchot>.json`
+(12 MB, ~3 MB gzipped; `python fetch_text.py` rebuilds it from Sefaria, same
+Hebrew version as the word counts, halacha counts verified). The page copies
+these files into their own Cache Storage bucket (`rambam-texts-v1`) a few
+seconds after loading — the **Save text offline** button shows progress and lets
+you retry — and requests for them are served cache-first by the service worker,
+so the text works offline and survives app restarts. If a local file is
+unavailable (e.g. the page opened from disk) it falls back to the Sefaria API.
