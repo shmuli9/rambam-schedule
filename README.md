@@ -366,9 +366,9 @@ there automatically. Restyle the icon with
 Each day's reading is a link; tapping it opens the Hebrew text of exactly those
 halachot with **START**/**END** markers. The text comes from `texts/<hilchot>.json`
 (12 MB, ~3 MB gzipped; `python fetch_text.py` rebuilds it from Sefaria, same
-Hebrew version as the word counts, halacha counts verified). The page copies
-these files into their own Cache Storage bucket (`rambam-texts-v1`) a few
-seconds after loading — the **Save text offline** button shows progress and lets
-you retry — and requests for them are served cache-first by the service worker,
-so the text works offline and survives app restarts. If a local file is
-unavailable (e.g. the page opened from disk) it falls back to the Sefaria API.
+Hebrew version as the word counts, halacha counts verified).
+Nothing is downloaded in advance: the service worker stores each hilchot's file
+(50–300 KB) in its own Cache Storage bucket (`rambam-texts-v1`) the first time a
+day in it is opened, and serves it cache-first from then on, so text you've
+opened works offline and survives app restarts. If a local file is unavailable
+(e.g. the page opened from disk) it falls back to the Sefaria API.

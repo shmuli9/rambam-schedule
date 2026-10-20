@@ -8,7 +8,7 @@
  */
 const CACHE = 'rambam-yad-v3';
 /* The Hebrew text (texts/*.json, ~12 MB, 3 MB gzipped) lives in its own cache:
- * the page fills it in the background, it is read cache-first, and bumping CACHE
+ * each file is stored on first use (nothing is fetched ahead), read cache-first, and bumping CACHE
  * never throws it away. */
 const TEXT_CACHE = 'rambam-texts-v1';
 const PRECACHE = [
