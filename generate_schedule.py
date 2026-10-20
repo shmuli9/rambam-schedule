@@ -1036,6 +1036,7 @@ def write_html(entries, params, out_path):
     data = (
         f"const SEFARIM = {dump(sefarim)};\n"
         f"const HILCHOT = {dump(hilchot)};\n"
+        f"const HSLUG = {dump(hil_slug)};\n"
         f"const PERAKIM = {dump(perakim)};\n"
         f"const WSETS = {dump(wsets)};\n"
         f"const DEFAULT_SET = {dump(default_set)};\n"
@@ -1202,7 +1203,34 @@ def write_html(entries, params, out_path):
     #todayBtn { position: fixed; right: calc(16px + var(--sr)); bottom: calc(16px + var(--sb)); z-index: 20;
       min-height: 48px; padding: 0 20px; border-radius: 24px; box-shadow: 0 4px 14px rgba(0,0,0,.28); }
   }
+  a.rf { color: inherit; text-decoration: underline dotted; text-underline-offset: 3px; cursor: pointer; }
+  a.rf:hover { color: var(--head); }
+  #txm { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.5); display: flex;
+         align-items: center; justify-content: center; padding: 16px; }
+  #txm[hidden] { display: none; }
+  .txbox { background:#fff; border-radius: 12px; width: min(760px, 100%); max-height: 100%;
+           display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,.35); overflow: hidden; }
+  .txhead { display:flex; justify-content: space-between; align-items:center; gap: 10px;
+            padding: 12px 16px; background: var(--head); color:#fff; }
+  .txhead button { background: transparent; color:#fff; border: 0; font-size: 22px; line-height: 1;
+                   min-width: 40px; min-height: 40px; cursor: pointer; }
+  #txB { overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+         padding: 4px 16px calc(16px + var(--sb)); }
+  .txit h3 { margin: 16px 0 4px; font-size: 15px; }
+  .txit .meta { font-size: 13px; color:#444; margin-bottom: 8px; line-height: 1.5; }
+  .txit .meta a { color: var(--head); }
+  .txit .snip { direction: rtl; unicode-bidi: isolate; color:#000; }
+  .hl { direction: rtl; text-align: right; font-size: 20px; line-height: 1.75; padding: 4px 0;
+        border-bottom: 1px solid #eee; font-family: "SBL Hebrew", "Frank Ruehl CLM", "David", "Times New Roman", serif; }
+  .hl .hn { font-family: system-ui, sans-serif; font-size: 12px; color: #fff; background: #7a8794;
+            border-radius: 9px; padding: 1px 7px; margin-left: 8px; direction: ltr; unicode-bidi: isolate; }
+  .mk { font-size: 12px; font-weight: 700; letter-spacing: .04em; padding: 3px 8px; border-radius: 6px; margin: 8px 0 2px;
+        direction: ltr; text-align: left; }
+  .mk.st { background:#e6f4ea; color:#1e6b34; }
+  .mk.en { background:#fdecea; color:#a52a1f; }
+  .txerr { color:#a52a1f; font-size: 14px; padding: 8px 0; }
   @media print {
+    #txm { display: none !important; }
     #todayBtn { display: none !important; }
     @page { size: A4 landscape; margin: 10mm; }
     body { background:#fff; }
@@ -1287,6 +1315,12 @@ def write_html(entries, params, out_path):
   </tr></thead>
   <tbody></tbody>
 </table>
+</div>
+<div id="txm" hidden role="dialog" aria-modal="true" aria-labelledby="txT">
+  <div class="txbox">
+    <div class="txhead"><b id="txT"></b><button id="txX" aria-label="Close">&#10005;</button></div>
+    <div id="txB"></div>
+  </div>
 </div>
 <script>
 /* ---- embedded data -------------------------------------------------- */
@@ -1640,7 +1674,9 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
       '<td class="wcell" data-v="' + r.weightAvg.toFixed(3) + '">' +
         r.items.map(it => itemWeight(it.p)).join('<br>') + '</td>' +
       '<td class="learning">' +
-        r.items.map(it => esc(itemLabel(PERAKIM[it.p], PWORD[it.p], it.a, it.b))).join('<br>') +
+        r.items.map(it => '<a class="rf" href="' + esc(sefariaUrl(it)) + '" data-day="' + r.dayNo +
+          '" title="Show the Hebrew text for this day">' +
+          esc(itemLabel(PERAKIM[it.p], PWORD[it.p], it.a, it.b)) + '</a>').join('<br>') +
       '</td>' +
       '<td data-v="' + r.halachot + '">' + r.halachot + '</td>' +
       '<td data-v="' + r.words + '">' + r.words.toLocaleString() + '</td>' +
@@ -1836,6 +1872,92 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     return fmtW(w) + (Math.abs(h - w) >= 0.005 ? ' <span class="hw">(hand ' + fmtW(h) + ')</span>' : '');
   }
 
+  /* ---- the actual text: modal (Hebrew from Sefaria) -------------------- */
+  const FLAT = /Mitzvot$|Transmission_of_the_Oral_Law$/;   // one-"perek" texts: ref has no perek
+  function sefRef(it) {
+    const p = PERAKIM[it.p], slug = HSLUG[p[0]];
+    const lo = unit(p, it.a).halacha, hi = unit(p, it.b).halacha;
+    const span = lo === hi ? String(lo) : lo + '-' + hi;
+    const flat = FLAT.test(slug);
+    return { ref: slug + '.' + (flat ? '' : p[1] + '.') + span, lo: lo, hi: hi, p: p,
+             name: HILCHOT[p[0]][1] + ' ' + (flat ? '' : p[1] + ':') + (lo === hi ? lo : lo + '\u2013' + hi),
+             pre: flat ? '' : p[1] + ':' };
+  }
+  function sefariaUrl(it) { return 'https://www.sefaria.org/' + encodeURI(sefRef(it).ref) + '?lang=he'; }
+
+  const txCache = new Map();
+  function fetchText(ref) {
+    if (!txCache.has(ref)) {
+      const pr = fetch('https://www.sefaria.org/api/v3/texts/' + encodeURIComponent(ref) +
+                       '?version=hebrew&return_format=text_only')
+        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(d => {
+          const v = d.versions && d.versions[0];
+          if (!v) throw new Error('no Hebrew text');
+          let t = v.text; if (!Array.isArray(t)) t = [t];
+          return t.flat(3).map(plain);
+        });
+      pr.catch(() => txCache.delete(ref));
+      txCache.set(ref, pr);
+    }
+    return txCache.get(ref);
+  }
+  function plain(h) {
+    const d = new DOMParser().parseFromString(String(h), 'text/html');
+    d.querySelectorAll('sup, i.footnote').forEach(n => n.remove());
+    return d.body.textContent.replace(/\s+/g, ' ').trim();
+  }
+  function words(t, n, tail) {
+    const w = t.split(' ');
+    if (w.length <= n) return t;
+    return tail ? '\u2026 ' + w.slice(-n).join(' ') : w.slice(0, n).join(' ') + ' \u2026';
+  }
+
+  const txm = document.getElementById('txm'), txB = document.getElementById('txB');
+  function closeText() { txm.hidden = true; document.body.style.overflow = ''; }
+  document.getElementById('txX').addEventListener('click', closeText);
+  txm.addEventListener('click', e => { if (e.target === txm) closeText(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !txm.hidden) closeText(); });
+
+  function showText(dayNo, k) {
+    const r = current.find(x => x.type === 'learn' && x.dayNo === dayNo);
+    if (!r) return;
+    document.getElementById('txT').innerHTML = 'Day ' + r.dayNo + ' · ' + r.iso + ' · <bdi>' + esc(r.heb) + '</bdi>';
+    txB.innerHTML = r.items.map((it, i) => {
+      const f = sefRef(it), p = f.p;
+      const u0 = unit(p, it.a), u1 = unit(p, it.b);
+      const note = (u0.part || u1.part)
+        ? '<br>Note: this day covers only part of a long halakha (' +
+          esc(spanText(p, it.a, it.b)) + '); the whole halakha is shown below.' : '';
+      return '<section class="txit" id="tx' + i + '"><h3>' + (i + 1) + '. ' + esc(f.name) + '</h3>' +
+        '<div class="meta" id="txm' + i + '">Starts at ' + esc(f.pre) + f.lo + ' \u00b7 ends at ' + esc(f.pre) + f.hi +
+        ' \u00b7 <a href="' + esc(sefariaUrl(it)) + '" target="_blank" rel="noopener">open in Sefaria \u2197</a>' + note +
+        '</div><div id="txt' + i + '">Loading\u2026</div></section>';
+    }).join('');
+    txm.hidden = false;
+    document.body.style.overflow = 'hidden';
+    txB.scrollTop = 0;
+    r.items.forEach((it, i) => {
+      const f = sefRef(it);
+      fetchText(f.ref).then(hs => {
+        const box = document.getElementById('txt' + i), meta = document.getElementById('txm' + i);
+        if (!box) return;
+        box.innerHTML = hs.map((t, j) =>
+          (j === 0 ? '<div class="mk st">\u25b6 START</div>' : '') +
+          '<div class="hl" dir="rtl" lang="he"><span class="hn">' + esc(f.pre) + (f.lo + j) + '</span>' + esc(t) + '</div>' +
+          (j === hs.length - 1 ? '<div class="mk en">\u25a0 END</div>' : '')).join('');
+        meta.insertAdjacentHTML('beforeend',
+          '<br>Begins: <span class="snip">' + esc(words(hs[0], 7, false)) + '</span>' +
+          '<br>Ends: <span class="snip">' + esc(words(hs[hs.length - 1], 7, true)) + '</span>');
+        if (k === i) document.getElementById('tx' + i).scrollIntoView();
+      }).catch(err => {
+        const box = document.getElementById('txt' + i);
+        if (box) box.innerHTML = '<div class="txerr">Could not load the text (' + esc(err.message) +
+          ') \u2014 you need to be online. Use the Sefaria link above.</div>';
+      });
+    });
+  }
+
   /* ---- wiring ------------------------------------------------------- */
   /* last effort / start the user chose, restored on reload */
   const PREFS_KEY = 'rambam-yad-prefs-v1';
@@ -1899,6 +2021,13 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     rebuild();
   });
   document.getElementById('ics').addEventListener('click', exportIcs);
+  tbody.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a.rf');
+    if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
+    e.preventDefault();
+    const links = Array.from(a.closest('td').querySelectorAll('a.rf'));
+    showText(+a.dataset.day, links.indexOf(a));
+  });
   tbody.addEventListener('change', e => {
     const cb = e.target;
     if (cb.matches && cb.matches('input[data-day]')) setDoneThrough(+cb.dataset.day, cb.checked);
@@ -1997,7 +2126,7 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
            .replace("@@MIN_EFFORT@@", str(int(min_effort)))   # also used in updateStats()
            .replace("@@EFFORT_MAX@@", str(effort_max))
            .replace("@@DEFAULT@@", f"{budget:g}")
-           .replace("@@UI_VERSION@@", "phone-4")
+           .replace("@@UI_VERSION@@", "phone-5")
            .replace("@@MIN_SPLIT@@", str(params["min_split_words"]))
            .replace("@@MAX_PERAKIM@@", str(params["max_perakim"])))
 
