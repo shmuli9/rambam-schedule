@@ -1285,6 +1285,8 @@ def write_html(entries, params, out_path):
   <button id="reset" class="sec">Reset</button>
   <span class="progress" id="progress"></span>
   <button id="clearDone" title="Forget all completed days (stored only in this browser)" hidden>Clear progress</button>
+  <button id="restoreBtn" class="sec" title="Restore completed days from a daily backup in your gist">Restore</button>
+  <button id="syncBtn" title="Sync completed days across devices through a private GitHub gist">Sync</button>
   <button id="ics" class="primary sec" title="Download an .ics file of the current pace — import into Apple Calendar, Gmail, Outlook, etc.">📅 Export .ics</button>
   <span class="count sec" id="count"></span>
 </div>
@@ -1441,11 +1443,104 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     } catch (e) { /* storage blocked or corrupt: start empty */ }
     return [];
   }
-  function saveFrozen() {
+  function saveFrozen(local) {
     try {
       if (frozen.length) localStorage.setItem(STORE_KEY, JSON.stringify({ n: PERAKIM.length, days: frozen }));
       else localStorage.removeItem(STORE_KEY);
     } catch (e) { /* ignore */ }
+    if (local !== false) { sync.t = Date.now(); saveSync(); syncSoon(); }
+  }
+
+  /* ---- cross-device sync via a private GitHub gist ------------------- */
+  // The token (classic, "gist" scope only) and the last-change time live in their own
+  // localStorage key; the progress key above is untouched. Newest change wins.
+  const SYNC_KEY = 'rambam-yad-sync-v1', GIST_FILE = 'rambam-progress.json', BACKUPS = 14;
+  let sync = (function () {
+    try { return JSON.parse(localStorage.getItem(SYNC_KEY) || 'null') || {}; } catch (e) { return {}; }
+  })();
+  function saveSync() { try { localStorage.setItem(SYNC_KEY, JSON.stringify(sync)); } catch (e) { /* ignore */ } }
+  function gh(path, method, body) {
+    return fetch('https://api.github.com' + path, {
+      method: method || 'GET',
+      headers: { Authorization: 'Bearer ' + sync.token, Accept: 'application/vnd.github+json' },
+      body: body ? JSON.stringify(body) : undefined
+    }).then(r => { if (!r.ok) throw new Error('GitHub ' + r.status); return r.json(); });
+  }
+  function syncLabel(s) {
+    const b = document.getElementById('syncBtn');
+    if (b) b.textContent = s;
+  }
+  let syncTimer = 0, syncing = false;
+  function syncSoon() { if (sync.token) { clearTimeout(syncTimer); syncTimer = setTimeout(syncNow, 1000); } }
+  async function syncNow() {
+    if (!sync.token || syncing) return;
+    syncing = true; syncLabel('Syncing…');
+    try {
+      const mine = () => JSON.stringify({ n: PERAKIM.length, t: sync.t || 0, days: frozen });
+      if (!sync.gist) {                                     // find ours, else create it
+        const list = await gh('/gists?per_page=100');
+        const g = list.find(x => x.files && x.files[GIST_FILE]);
+        if (g) sync.gist = g.id;
+      }
+      let remote = null, rfiles = {};
+      if (sync.gist) {
+        const g = await gh('/gists/' + sync.gist);
+        rfiles = g.files;
+        remote = JSON.parse(rfiles[GIST_FILE].content);
+        if (remote.n !== PERAKIM.length || !Array.isArray(remote.days)) remote = null;
+      }
+      const rt = remote ? remote.t || 0 : -1, lt = sync.t || 0;
+      // never synced here but has progress on both sides: keep whichever is further along
+      const useRemote = remote && (lt ? rt > lt : remote.days.length > frozen.length);
+      if (useRemote) {
+        frozen = remote.days; sync.t = rt;
+        saveFrozen(false); saveSync(); rebuild();
+      }
+      const push = !remote || (!useRemote && (lt ? lt > rt : frozen.length > remote.days.length));
+      // one snapshot per day (last BACKUPS kept) so a mistaken clear/untick can be restored
+      const bn = 'backup-' + todayIso() + '.json', files = {};
+      const snap = frozen.length && !rfiles[bn];
+      if (push || snap) {
+        if (push && !lt) sync.t = Date.now();
+        if (push) files[GIST_FILE] = { content: mine() };
+        if (snap) {
+          files[bn] = { content: mine() };
+          Object.keys(rfiles).filter(k => /^backup-/.test(k)).sort()
+            .slice(0, Math.max(0, Object.keys(rfiles).filter(k => /^backup-/.test(k)).length + 1 - BACKUPS))
+            .forEach(k => { files[k] = null; });
+        }
+        if (sync.gist) await gh('/gists/' + sync.gist, 'PATCH', { files: files });
+        else sync.gist = (await gh('/gists', 'POST', { description: 'Rambam schedule progress', public: false, files: files })).id;
+        saveSync();
+      }
+      const d = new Date();
+      syncLabel('✓ Synced ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0'));
+    } catch (e) {
+      syncLabel('Sync failed');
+      if (/40[13]/.test(e.message)) { sync.token = ''; saveSync(); }
+    } finally { syncing = false; }
+  }
+  async function syncRestore() {
+    if (!sync.token || !sync.gist) { alert('Turn on Sync first.'); return; }
+    try {
+      const g = await gh('/gists/' + sync.gist);
+      const names = Object.keys(g.files).filter(k => /^backup-/.test(k)).sort().reverse();
+      if (!names.length) { alert('No backups yet (one is saved per day the app is opened).'); return; }
+      const info = names.map(k => { const d = JSON.parse(g.files[k].content).days; return k.slice(7, 17) + ' (' + d.length + ' days done)'; });
+      const pick = prompt('Restore progress from which day?\n' + info.join('\n') + '\n\nType the date (YYYY-MM-DD):', names[0].slice(7, 17));
+      const f = pick && g.files['backup-' + pick.trim() + '.json'];
+      if (!f) return;
+      frozen = JSON.parse(f.content).days;
+      saveFrozen(); rebuild();
+    } catch (e) { syncLabel('Restore failed'); }
+  }
+  function syncSetup() {
+    const t = prompt(sync.token
+      ? 'Sync is on. Paste a new token to replace it, or clear the box to turn sync off.'
+      : 'Paste a GitHub classic token with only the "gist" scope. Progress is stored in a private gist.', '');
+    if (t === null) return;
+    if (!t.trim()) { if (sync.token) { sync = { t: sync.t }; saveSync(); syncLabel('Sync'); } return; }
+    sync.token = t.trim(); sync.gist = ''; saveSync(); syncNow();
   }
 
   function makeLearnRow(items, effort, day, dayNo, seen, done) {
@@ -2063,6 +2158,9 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     saveFrozen();
     rebuild();
   });
+  document.getElementById('syncBtn').addEventListener('click', syncSetup);
+  document.getElementById('restoreBtn').addEventListener('click', syncRestore);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) syncNow(); });
   distToggle.addEventListener('click', () => {
     const collapsed = distPanel.classList.toggle('collapsed');
     distToggle.textContent = collapsed ? 'Show' : 'Hide';
@@ -2117,6 +2215,7 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
 
   loadPrefs();
   rebuild();
+  syncNow();
   /* launched from the home screen: open on today's learning like a native app */
   if ((window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone) {
     requestAnimationFrame(() => scrollToToday(false));
