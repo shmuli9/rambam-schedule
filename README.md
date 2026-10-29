@@ -372,3 +372,11 @@ Nothing is downloaded in advance: the service worker stores each hilchot's file
 day in it is opened, and serves it cache-first from then on, so text you've
 opened works offline and survives app restarts. If a local file is unavailable
 (e.g. the page opened from disk) it falls back to the Sefaria API.
+
+## English translation, notes and Steinsaltz
+
+- `fetch_text_en.py` — downloads Eliyahu Touger's English translation (Moznaim; CC-BY-NC on Sefaria) with its
+  English explanatory footnotes into `texts_en/` (~17 MB, cached on demand by the PWA like the Hebrew).
+  Shown beside/under each halakha in the day's text modal; tap a numbered marker to open that note, or "All notes".
+- Steinsaltz's modern Hebrew word notes are **not** bundled (all rights reserved); the modal fetches them live from
+  Sefaria when the "Steinsaltz" toggle is on and the service worker keeps them for offline re-reading.

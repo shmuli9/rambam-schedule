@@ -1229,6 +1229,45 @@ def write_html(entries, params, out_path):
   .mk.st { background:#e6f4ea; color:#1e6b34; }
   .mk.en { background:#fdecea; color:#a52a1f; }
   .txerr { color:#a52a1f; font-size: 14px; padding: 8px 0; }
+  .txbar { display:flex; gap:8px; padding: 8px 16px; border-bottom: 1px solid var(--line); background:#f5f6f8; flex-wrap: wrap; }
+  .txbar button { font: inherit; font-size: 14px; min-height: 40px; padding: 0 14px; border-radius: 20px; cursor: pointer;
+                  border: 1px solid var(--line); background:#fff; color:#22405c; }
+  .txbar button[aria-pressed="true"] { background: var(--head); border-color: var(--head); color:#fff; }
+  .hl { margin-top: 2px; }
+  .hl.last { border-bottom: 0; }
+  /* one halakha = Hebrew, English, notes, Steinsaltz stacked (phone); Hebrew | English side by side on wide screens */
+  .hb { border-bottom: 1px solid #e3e6ea; padding: 6px 0 10px; }
+  .hb .hl { border-bottom: 0; }
+  .eng { direction: ltr; text-align: left; font-family: Georgia, "Times New Roman", serif; font-size: 17px; line-height: 1.6;
+        color:#1d2b3a; padding: 6px 0 2px; }
+  .eng .cred { display:block; font: 11px system-ui, sans-serif; color:#777; margin-top: 4px; }
+  .fn { font: 700 11px system-ui, sans-serif; color:#fff; background: #3b7ab8; border: 0; border-radius: 9px;
+        min-width: 22px; min-height: 22px; padding: 0 5px; margin: 0 2px; vertical-align: super; line-height: 1; cursor: pointer; }
+  .fn[aria-expanded="true"] { background:#a35a00; }
+  .fnote { direction: ltr; text-align: left; font: 14px/1.55 system-ui, sans-serif; background:#fff8e8; border-left: 3px solid #d9a441;
+           color:#3a2d12; padding: 8px 10px; margin: 6px 0; border-radius: 0 6px 6px 0; }
+  .fnote b { color:#a35a00; margin-right: 4px; }
+  .fnote[hidden] { display: none; }
+  .sz { direction: rtl; text-align: right; font-size: 16px; line-height: 1.6; background:#eef5fb; border-radius: 6px;
+        padding: 6px 10px; margin: 6px 0; color:#10283f; }
+  .sz .szl { direction: ltr; unicode-bidi: isolate; display:block; font: 11px system-ui, sans-serif; color:#46627d; margin-bottom: 2px; }
+  .sz p { margin: 0 0 6px; }
+  #txB.noHe .hl:not(.mkw), #txB.noEn .eng, #txB.noEn .fns { display: none; }
+  #txB.noSt .sz { display: none; }
+  #txB.allNotes .fnote[hidden] { display: block; }
+  @media (max-width: 600px) {
+    #txm { padding: 0; }
+    .txbox { border-radius: 0; height: 100%; }
+    #txB { padding-left: 12px; padding-right: 12px; }
+    .txbar { padding: 8px 12px; }
+  }
+  @media (min-width: 900px) {
+    .txbox { width: min(1040px, 100%); }
+    #txB.sbs .hb { display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; }
+    #txB.sbs .hb > .hl { grid-column: 2; grid-row: 1; }
+    #txB.sbs .hb > .engg { grid-column: 1; grid-row: 1; }
+    #txB.sbs .hb > .fns, #txB.sbs .hb > .sz { grid-column: 1 / -1; }
+  }
   @media print {
     #txm { display: none !important; }
     #todayBtn { display: none !important; }
@@ -1321,6 +1360,12 @@ def write_html(entries, params, out_path):
 <div id="txm" hidden role="dialog" aria-modal="true" aria-labelledby="txT">
   <div class="txbox">
     <div class="txhead"><b id="txT"></b><button id="txX" aria-label="Close">&#10005;</button></div>
+    <div class="txbar" id="txbar">
+      <button data-v="He" aria-pressed="true" title="Hebrew text">עברית</button>
+      <button data-v="En" aria-pressed="true" title="English translation (Touger)">English</button>
+      <button data-v="Notes" aria-pressed="false" title="Open all the English explanatory notes (or tap a number to open just one)">All notes</button>
+      <button data-v="St" aria-pressed="false" title="Steinsaltz's modern Hebrew word-by-word explanation (needs a connection the first time)">Steinsaltz</button>
+    </div>
     <div id="txB"></div>
   </div>
 </div>
@@ -2005,6 +2050,51 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     }).catch(() => fetchText(f.ref));
   }
 
+  /* English (Touger, CC-BY-NC) with its footnotes: texts_en/<slug>.json, same layout
+     as the Hebrew -> [[text, [notes]] | null per halakha]. Optional: failure just hides it. */
+  const enFiles = new Map();
+  function enFile(slug) {
+    if (!enFiles.has(slug)) {
+      const pr = fetch('../texts_en/' + slug.replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '') + '.json')
+        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+      pr.catch(() => enFiles.delete(slug));
+      enFiles.set(slug, pr);
+    }
+    return enFiles.get(slug);
+  }
+  function loadEn(f) {
+    const slug = HSLUG[f.p[0]];
+    return enFile(slug).then(d => {
+      const per = d.t[FLAT.test(slug) ? 0 : f.p[1] - 1];
+      return per ? per.slice(f.lo - 1, f.hi) : [];
+    });
+  }
+  /* Steinsaltz's short Hebrew glosses are fetched live from Sefaria (not bundled: all
+     rights reserved) and kept by the service worker for offline re-reading. */
+  const stCache = new Map();
+  function loadSt(f) {
+    const slug = HSLUG[f.p[0]];
+    if (FLAT.test(slug)) return Promise.resolve([]);
+    const ref = 'Steinsaltz on ' + slug.replace(/_/g, ' ') + ' ' + f.p[1] + ':' + f.lo + (f.hi > f.lo ? '-' + f.hi : '');
+    if (!stCache.has(ref)) {
+      const pr = fetch('https://www.sefaria.org/api/texts/' + encodeURIComponent(ref) + '?context=0&commentary=0')
+        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(d => {
+          let h = d.he; if (!Array.isArray(h)) return [];
+          if (typeof h[0] === 'string') h = [h];
+          return h.map(a => (Array.isArray(a) ? a : [a]).map(x => String(x)
+            .replace(/<(?!\/?b>)[^>]*>/g, '').replace(/\s+/g, ' ').trim()).filter(Boolean));
+        });
+      pr.catch(() => stCache.delete(ref));
+      stCache.set(ref, pr);
+    }
+    return stCache.get(ref);
+  }
+  function stHtml(list) {
+    return list.length ? '<div class="sz" dir="rtl" lang="he"><span class="szl">Steinsaltz · word notes</span>' +
+      list.map(x => '<p>' + x + '</p>').join('') + '</div>' : '';
+  }
+
   const txCache = new Map();
   function fetchText(ref) {
     if (!txCache.has(ref)) {
@@ -2039,9 +2129,11 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
   txm.addEventListener('click', e => { if (e.target === txm) closeText(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !txm.hidden) closeText(); });
 
+  let shownItems = [];
   function showText(dayNo, k) {
     const r = current.find(x => x.type === 'learn' && x.dayNo === dayNo);
     if (!r) return;
+    shownItems = r.items;
     document.getElementById('txT').innerHTML = 'Day ' + r.dayNo + ' · ' + r.iso + ' · <bdi>' + esc(r.heb) + '</bdi>';
     txB.innerHTML = r.items.map((it, i) => {
       const f = sefRef(it), p = f.p;
@@ -2059,24 +2151,85 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     txB.scrollTop = 0;
     r.items.forEach((it, i) => {
       const f = sefRef(it);
-      loadItem(f).then(hs => {
+      /* Hebrew is required; English is a bonus that must not block it */
+      Promise.all([loadItem(f), loadEn(f).catch(() => null)]).then(([hs, en]) => {
         const box = document.getElementById('txt' + i), meta = document.getElementById('txm' + i);
         if (!box) return;
-        box.innerHTML = hs.map((t, j) =>
-          (j === 0 ? '<div class="mk st">\u25b6 START</div>' : '') +
-          '<div class="hl" dir="rtl" lang="he"><span class="hn">' + esc(f.pre) + (f.lo + j) + '</span>' + esc(t) + '</div>' +
-          (j === hs.length - 1 ? '<div class="mk en">\u25a0 END</div>' : '')).join('');
+        box.innerHTML = hs.map((t, j) => {
+          const e = en && en[j];
+          return (j === 0 ? '<div class="mk st">▶ START</div>' : '') +
+            '<div class="hb" data-j="' + j + '">' +
+            '<div class="hl" dir="rtl" lang="he"><span class="hn">' + esc(f.pre) + (f.lo + j) + '</span>' + esc(t) + '</div>' +
+            (e ? '<div class="eng" lang="en">' + enHtml(e[0]) + '</div>' + notesHtml(e[1]) :
+                 en ? '' : '<div class="eng"><i>English not available (this text has none, or you are offline and haven't opened it before).</i></div>') +
+            '<div class="stw"></div></div>' +
+            (j === hs.length - 1 ? '<div class="mk en">■ END</div>' : '');
+        }).join('');
         meta.insertAdjacentHTML('beforeend',
           '<br>Begins: <span class="snip">' + esc(words(hs[0], 7, false)) + '</span>' +
           '<br>Ends: <span class="snip">' + esc(words(hs[hs.length - 1], 7, true)) + '</span>');
         if (k === i) document.getElementById('tx' + i).scrollIntoView();
+        if (!txB.classList.contains('noSt')) addSt(i, f);
       }).catch(err => {
         const box = document.getElementById('txt' + i);
         if (box) box.innerHTML = '<div class="txerr">Could not load the text (' + esc(err.message) +
-          ') \u2014 you need to be online. Use the Sefaria link above.</div>';
+          ') — you need to be online. Use the Sefaria link above.</div>';
       });
     });
   }
+
+  /* English is already escaped by fetch_text_en.py (only <i>/<b>/<br> and {n} markers remain) */
+  function enHtml(t) {
+    return t.replace(/\{(\d+)\}/g, '<button class="fn" data-n="$1" aria-expanded="false" aria-label="Note $1">$1</button>');
+  }
+  function notesHtml(notes) {
+    return notes.length ? '<div class="fns">' + notes.map((n, i) =>
+      '<div class="fnote" data-n="' + (i + 1) + '" hidden><b>' + (i + 1) + '</b>' + n + '</div>').join('') + '</div>' : '';
+  }
+  function addSt(i, f) {
+    const sec = document.getElementById('tx' + i);
+    loadSt(f).then(per => {
+      if (!sec.isConnected) return;
+      sec.querySelectorAll('.hb').forEach((hb, j) => {
+        hb.querySelector('.stw').innerHTML = stHtml(per[j] || []);
+      });
+    }).catch(() => {
+      const w = sec.querySelector('.stw');
+      if (w && !w.innerHTML) w.innerHTML = '<div class="sz"><span class="szl">Steinsaltz notes need a connection the first time you open them.</span></div>';
+    });
+  }
+
+  /* reading prefs: which layers are shown; remembered across visits */
+  const VIEW_KEY = 'rambam-yad-view-v1';
+  const view = { He: true, En: true, Notes: false, St: false };
+  try { Object.assign(view, JSON.parse(localStorage.getItem(VIEW_KEY) || '{}')); } catch (e) { /* ignore */ }
+  function applyView() {
+    txB.classList.toggle('noHe', !view.He);
+    txB.classList.toggle('noEn', !view.En);
+    txB.classList.toggle('allNotes', view.Notes);
+    txB.classList.toggle('noSt', !view.St);
+    txB.classList.toggle('sbs', view.He && view.En);
+    document.querySelectorAll('#txbar button').forEach(b => b.setAttribute('aria-pressed', view[b.dataset.v] ? 'true' : 'false'));
+  }
+  document.getElementById('txbar').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const v = b.dataset.v; view[v] = !view[v];
+    if (!view.He && !view.En) view[v === 'He' ? 'En' : 'He'] = true;   // never show nothing
+    try { localStorage.setItem(VIEW_KEY, JSON.stringify(view)); } catch (err) { /* ignore */ }
+    applyView();
+    if (v === 'St' && view.St) shownItems.forEach((it, i) => {
+      if (!txB.querySelector('#tx' + i + ' .stw:not(:empty)')) addSt(i, sefRef(it));
+    });
+  });
+  /* tap a note number to open/close just that note */
+  txB.addEventListener('click', e => {
+    const b = e.target.closest('.fn'); if (!b) return;
+    const note = b.closest('.hb').querySelector('.fnote[data-n="' + b.dataset.n + '"]');
+    if (!note) return;
+    note.hidden = !note.hidden;
+    b.setAttribute('aria-expanded', note.hidden ? 'false' : 'true');
+  });
+  applyView();
 
   /* ---- wiring ------------------------------------------------------- */
   /* last effort / start the user chose, restored on reload */

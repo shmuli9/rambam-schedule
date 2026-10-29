@@ -6,8 +6,9 @@
  * immediately and the cached copy is only the offline fallback; everything else
  * is stale-while-revalidate.  Bump CACHE to purge old files.  Paths are relative so it works under a GitHub Pages sub-path.
  */
-const CACHE = 'rambam-yad-v3';
-/* The Hebrew text (texts/*.json, ~12 MB, 3 MB gzipped) lives in its own cache:
+const CACHE = 'rambam-yad-v4';
+/* The Hebrew text (texts/*.json, ~12 MB, 3 MB gzipped), the English translation (texts_en/*.json,
+ * ~17 MB) and Steinsaltz's glosses fetched from Sefaria live in their own cache:
  * each file is stored on first use (nothing is fetched ahead), read cache-first, and bumping CACHE
  * never throws it away. */
 const TEXT_CACHE = 'rambam-texts-v1';
@@ -37,8 +38,12 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   const req = e.request;
-  if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
-  if (/\/texts\/[^/]+\.json$/.test(new URL(req.url).pathname)) {
+  const url = new URL(req.url);
+  /* Steinsaltz's word notes come from Sefaria's API: cache-first, so re-reading works offline */
+  const steinsaltz = req.method === 'GET' && url.origin === 'https://www.sefaria.org' &&
+    url.pathname.startsWith('/api/texts/Steinsaltz');
+  if (req.method !== 'GET' || (url.origin !== self.location.origin && !steinsaltz)) return;
+  if (steinsaltz || /\/texts(_en)?\/[^/]+\.json$/.test(url.pathname)) {
     e.respondWith(
       caches.open(TEXT_CACHE).then(cache =>
         cache.match(req, { ignoreSearch: true }).then(hit => hit || fetch(req).then(res => {
