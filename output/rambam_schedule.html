@@ -206,7 +206,13 @@
   .sz .szl { direction: ltr; unicode-bidi: isolate; display:block; font: 11px system-ui, sans-serif; color:#46627d; margin-bottom: 2px; }
   .sz p { margin: 0 0 6px; }
   #txB.noHe .hl:not(.mkw), #txB.noEn .eng, #txB.noEn .fns { display: none; }
-  #txB.noSt .sz { display: none; }
+  #txB.noSt .sz, #txB.noSt .glnotes { display: none; }
+  .gl { background: #dcebf9; border-bottom: 2px solid #3b7ab8; border-radius: 3px; cursor: pointer; padding: 0 1px; }
+  .gl.open { background: #b9d6f2; }
+  #txB.noSt .gl { background: none; border-bottom: 0; cursor: auto; }
+  .glnote { font-size: 16px; margin: 4px 0 6px; }
+  .glnote b { color: #1f4e79; }
+  #txB.allNotes .glnote[hidden] { display: block; }
   #txB.allNotes .fnote[hidden] { display: block; }
   @media (max-width: 600px) {
     #txm { padding: 0; }
@@ -220,6 +226,7 @@
     #txB.sbs .hb > .hl { grid-column: 2; grid-row: 1; }
     #txB.sbs .hb > .engg { grid-column: 1; grid-row: 1; }
     #txB.sbs .hb > .fns, #txB.sbs .hb > .sz { grid-column: 1 / -1; }
+    #txB.sbs .hb > .glnotes { grid-column: 1 / -1; grid-row: 2; }
   }
   @media print {
     #txm { display: none !important; }
@@ -1089,11 +1096,11 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
   txm.addEventListener('click', e => { if (e.target === txm) closeText(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !txm.hidden) closeText(); });
 
-  let shownItems = [];
+  let shownItems = [], shownHs = [];
   function showText(dayNo, k) {
     const r = current.find(x => x.type === 'learn' && x.dayNo === dayNo);
     if (!r) return;
-    shownItems = r.items;
+    shownItems = r.items; shownHs = [];
     document.getElementById('txT').innerHTML = 'Day ' + r.dayNo + ' · ' + r.iso + ' · <bdi>' + esc(r.heb) + '</bdi>';
     txB.innerHTML = r.items.map((it, i) => {
       const f = sefRef(it), p = f.p;
@@ -1129,7 +1136,8 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
           '<br>Begins: <span class="snip">' + esc(words(hs[0], 7, false)) + '</span>' +
           '<br>Ends: <span class="snip">' + esc(words(hs[hs.length - 1], 7, true)) + '</span>');
         if (k === i) document.getElementById('tx' + i).scrollIntoView();
-        if (!txB.classList.contains('noSt')) addSt(i, f);
+        shownHs[i] = hs;
+        if (!txB.classList.contains('noSt')) addSt(i);
       }).catch(err => {
         const box = document.getElementById('txt' + i);
         if (box) box.innerHTML = '<div class="txerr">Could not load the text (' + esc(err.message) +
@@ -1146,12 +1154,64 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     return notes.length ? '<div class="fns">' + notes.map((n, i) =>
       '<div class="fnote" data-n="' + (i + 1) + '" hidden><b>' + (i + 1) + '</b>' + n + '</div>').join('') + '</div>' : '';
   }
-  function addSt(i, f) {
-    const sec = document.getElementById('tx' + i);
+  /* Hebrew letters only, nikud/cantillation/punctuation dropped, with a map back to the original offsets */
+  function normHe(t) {
+    let n = '', map = [];
+    for (let k = 0; k < t.length; k++) {
+      const c = t[k];
+      if (c >= 'א' && c <= 'ת') { n += c; map.push(k); }
+      else if (/[\s־]/.test(c) && n && n[n.length - 1] !== ' ') { n += ' '; map.push(k); }
+    }
+    return { n: n, map: map };
+  }
+  function glossParts(g) {                 // '<b>phrase</b>. explanation' -> [phrase, explanation]
+    const m = /^\s*<b>([\s\S]*?)<\/b>\s*[.:]?\s*([\s\S]*)$/.exec(g);
+    return m ? [m[1].replace(/<[^>]*>/g, ''), m[2]] : null;
+  }
+  function inlineGloss(hb, text, label, list) {
+    const hl = hb.querySelector('.hl'), N = normHe(text), found = [], rest = [];
+    let from = 0;
+    list.forEach(g => {
+      const gp = glossParts(g);
+      if (!gp) { rest.push(g); return; }
+      const w = normHe(gp[0].split(/וכו['׳]|וגו['׳]|\.\.\.|…/)[0]).n.trim().split(' ').filter(Boolean);
+      let at = -1, len = 0;
+      for (let c = w.length; c >= Math.min(2, w.length) && at < 0; c--) {
+        const q = w.slice(0, c).join(' ');
+        if (q.length < 3) break;
+        at = N.n.indexOf(q, from);
+        if (at < 0) at = N.n.indexOf(q);
+        if (at >= 0 && found.some(x => at < x.e && at + q.length > x.s)) at = -1;   // overlaps an earlier one
+        if (at >= 0) len = q.length;
+      }
+      if (at < 0) { rest.push(g); return; }
+      found.push({ s: at, e: at + len, g: gp });
+      from = at + len;
+    });
+    if (!found.length) return rest;
+    found.sort((a, b) => a.s - b.s);
+    let out = '', pos = 0;
+    found.forEach((x, k) => {
+      const a = N.map[x.s], b = N.map[x.e - 1] + 1;
+      out += esc(text.slice(pos, a)) + '<span class="gl" data-k="' + k + '" tabindex="0" role="button">' + esc(text.slice(a, b)) + '</span>';
+      pos = b;
+    });
+    out += esc(text.slice(pos));
+    hl.innerHTML = '<span class="hn">' + esc(label) + '</span>' + out;
+    hb.querySelectorAll('.glnote').forEach(n => n.remove());
+    hb.querySelector('.hl').insertAdjacentHTML('afterend', '<div class="glnotes">' + found.map((x, k) =>
+      '<div class="glnote sz" data-k="' + k + '" dir="rtl" lang="he" hidden><b>' + x.g[0].replace(/<[^>]*>/g, '') + '</b>. ' + x.g[1] + '</div>').join('') + '</div>');
+    return rest;
+  }
+  function addSt(i) {
+    const sec = document.getElementById('tx' + i), f = sefRef(shownItems[i]);
     loadSt(f).then(per => {
       if (!sec.isConnected) return;
       sec.querySelectorAll('.hb').forEach((hb, j) => {
-        hb.querySelector('.stw').innerHTML = stHtml(per[j] || []);
+        /* glosses whose phrase is found in the halakha are marked in the Hebrew itself;
+           the rest stay in a list underneath */
+        const rest = inlineGloss(hb, shownHs[i][j], f.pre + (f.lo + j), per[j] || []);
+        hb.querySelector('.stw').innerHTML = stHtml(rest);
       });
     }).catch(() => {
       const w = sec.querySelector('.stw');
@@ -1178,11 +1238,23 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
     try { localStorage.setItem(VIEW_KEY, JSON.stringify(view)); } catch (err) { /* ignore */ }
     applyView();
     if (v === 'St' && view.St) shownItems.forEach((it, i) => {
-      if (!txB.querySelector('#tx' + i + ' .stw:not(:empty)')) addSt(i, sefRef(it));
+      if (shownHs[i] && !txB.querySelector('#tx' + i + ' .stw:not(:empty)') && !txB.querySelector('#tx' + i + ' .gl')) addSt(i);
     });
+  });
+  /* tap a highlighted Hebrew phrase to open/close its Steinsaltz note */
+  function glToggle(g) {
+    const n = g.closest('.hb').querySelector('.glnote[data-k="' + g.dataset.k + '"]');
+    if (!n) return;
+    n.hidden = !n.hidden;
+    g.classList.toggle('open', !n.hidden);
+  }
+  txB.addEventListener('keydown', e => {
+    const g = e.target.closest && e.target.closest('.gl');
+    if (g && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); glToggle(g); }
   });
   /* tap a note number to open/close just that note */
   txB.addEventListener('click', e => {
+    const g = e.target.closest('.gl'); if (g) { glToggle(g); return; }
     const b = e.target.closest('.fn'); if (!b) return;
     const note = b.closest('.hb').querySelector('.fnote[data-n="' + b.dataset.n + '"]');
     if (!note) return;
