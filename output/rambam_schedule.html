@@ -1121,7 +1121,7 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
             '<div class="hb" data-j="' + j + '">' +
             '<div class="hl" dir="rtl" lang="he"><span class="hn">' + esc(f.pre) + (f.lo + j) + '</span>' + esc(t) + '</div>' +
             (e ? '<div class="eng" lang="en">' + enHtml(e[0]) + '</div>' + notesHtml(e[1]) :
-                 en ? '' : '<div class="eng"><i>English not available (this text has none, or you are offline and haven't opened it before).</i></div>') +
+                 en ? '' : '<div class="eng"><i>English not available (this text has none, or you are offline and have not opened it before).</i></div>') +
             '<div class="stw"></div></div>' +
             (j === hs.length - 1 ? '<div class="mk en">■ END</div>' : '');
         }).join('');
