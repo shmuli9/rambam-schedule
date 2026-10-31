@@ -43,6 +43,21 @@ self.addEventListener('fetch', e => {
   const steinsaltz = req.method === 'GET' && url.origin === 'https://www.sefaria.org' &&
     url.pathname.startsWith('/api/texts/Steinsaltz');
   if (req.method !== 'GET' || (url.origin !== self.location.origin && !steinsaltz)) return;
+  /* the English Steinsaltz notes are still being filled in: show the cached copy but refresh it behind */
+  if (/\/texts_st_en\/[^/]+\.json$/.test(url.pathname)) {
+    e.respondWith(
+      caches.open(TEXT_CACHE).then(cache =>
+        cache.match(req, { ignoreSearch: true }).then(hit => {
+          const fresh = fetch(req, { cache: 'no-cache' }).then(res => {
+            if (res && res.ok) cache.put(req, res.clone());
+            return res;
+          });
+          if (hit) { fresh.catch(() => {}); return hit; }
+          return fresh;
+        }))
+    );
+    return;
+  }
   if (steinsaltz || /\/texts(_en)?\/[^/]+\.json$/.test(url.pathname)) {
     e.respondWith(
       caches.open(TEXT_CACHE).then(cache =>

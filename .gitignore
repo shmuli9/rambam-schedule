@@ -14,3 +14,5 @@ data/_sefaria_text_cache.json
 
 # local scratch copies of generated output
 output/*_copy.*
+st_src/
+st_work/
