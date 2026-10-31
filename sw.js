@@ -6,7 +6,7 @@
  * immediately and the cached copy is only the offline fallback; everything else
  * is stale-while-revalidate.  Bump CACHE to purge old files.  Paths are relative so it works under a GitHub Pages sub-path.
  */
-const CACHE = 'rambam-yad-v4';
+const CACHE = 'rambam-yad-v5';
 /* The Hebrew text (texts/*.json, ~12 MB, 3 MB gzipped), the English translation (texts_en/*.json,
  * ~17 MB) and Steinsaltz's glosses fetched from Sefaria live in their own cache:
  * each file is stored on first use (nothing is fetched ahead), read cache-first, and bumping CACHE
@@ -70,7 +70,8 @@ self.addEventListener('fetch', e => {
   }
   if (req.mode === 'navigate') {
     e.respondWith(
-      fetch(req, { cache: 'reload' })
+      /* a dead or very slow network must not leave the installed app blank: give up after 4 s */
+      Promise.race([fetch(req, { cache: 'reload' }), new Promise((_, rej) => setTimeout(() => rej(new Error('slow')), 4000))])
         .then(res => {
           if (res && res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
           return res;

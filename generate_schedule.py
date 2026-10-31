@@ -1307,6 +1307,7 @@ def write_html(entries, params, out_path):
   <h1>Rambam Yad — Learning Schedule</h1>
   <div class="sub">@@TOTAL_HAL@@ halachot / @@TOTAL_WORDS@@ words ·
     @@LOC@@ · <span id="stats"></span></div>
+  <div class="sub" id="offl" hidden></div>
 </header>
 <div class="controls">
   <label class="effort" title="First learning day. Shabbos, Yom Tov and fast days are skipped automatically.">
@@ -2083,10 +2084,14 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
   /* Steinsaltz's short Hebrew glosses are fetched live from Sefaria (not bundled: all
      rights reserved) and kept by the service worker for offline re-reading. */
   const stCache = new Map();
+  /* one request per perek (so the offline prefetch can fetch exactly these URLs), sliced per halakha */
+  function stPerekRef(slug, perek, n) {
+    return 'Steinsaltz on ' + slug.replace(/_/g, ' ').replace(' Their ', ' their ') + ' ' + perek + ':1-' + n;
+  }
   function loadSt(f) {
     const slug = HSLUG[f.p[0]];
     if (FLAT.test(slug)) return Promise.resolve([]);
-    const ref = 'Steinsaltz on ' + slug.replace(/_/g, ' ').replace(' Their ', ' their ') + ' ' + f.p[1] + ':' + f.lo + (f.hi > f.lo ? '-' + f.hi : '');
+    const ref = stPerekRef(slug, f.p[1], f.p[4]);
     if (!stCache.has(ref)) {
       const pr = fetch('https://www.sefaria.org/api/texts/' + encodeURIComponent(ref) + '?context=0&commentary=0')
         .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
@@ -2095,16 +2100,19 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
           if (typeof h[0] === 'string') h = [h];
           return h.map(a => (Array.isArray(a) ? a : [a]).map(x => String(x)
             .replace(/<(?!\/?b>)[^>]*>/g, '').replace(/\s+/g, ' ').trim()).filter(Boolean));
-        })
-        /* English for the same notes (translated offline, texts_st_en/): optional, matched by position */
-        .then(per => stEnFile(slug).then(d => {
-          const t = d.t[f.p[1] - 1] || [];
-          return per.map((a, j) => a.map((x, k) => ({ h: x, e: (t[f.lo - 1 + j] && t[f.lo - 1 + j].length === a.length && t[f.lo - 1 + j][k]) || '' })));
-        }).catch(() => per.map(a => a.map(x => ({ h: x, e: '' })))));
+        });
       pr.catch(() => stCache.delete(ref));
       stCache.set(ref, pr);
     }
-    return stCache.get(ref);
+    /* English for the same notes (translated offline, texts_st_en/): optional, matched by position */
+    return stCache.get(ref).then(hePer => {
+      const per = hePer.slice(f.lo - 1, f.hi);
+      while (per.length < f.hi - f.lo + 1) per.push([]);
+      return stEnFile(slug).then(d => {
+        const t = d.t[f.p[1] - 1] || [];
+        return per.map((a, j) => a.map((x, k) => ({ h: x, e: (t[f.lo - 1 + j] && t[f.lo - 1 + j].length === a.length && t[f.lo - 1 + j][k]) || '' })));
+      }).catch(() => per.map(a => a.map(x => ({ h: x, e: '' }))));
+    });
   }
   const stEnFiles = new Map();
   function stEnFile(slug) {
@@ -2476,6 +2484,49 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
     if (hadController) location.reload();   // a new version just took over
   });
   navigator.serviceWorker.register('../sw.js').catch(function () {});
+
+  /* Make the whole library available offline after the first visit: Hebrew, English, the English
+     Steinsaltz notes and (live from Sefaria) Steinsaltz's Hebrew, one perek per request. The service
+     worker stores each response as it passes through; this just asks for all of them, a few at a time,
+     skipping what is already stored. It resumes on the next visit if interrupted. */
+  (function () {
+    var el = document.getElementById('offl');
+    function say(t) { if (el) { el.hidden = !t; el.textContent = t; } }
+    function urls() {
+      var seen = {}, out = [];
+      function add(u) { if (!seen[u]) { seen[u] = 1; out.push(u); } }
+      PERAKIM.forEach(function (p) {
+        var slug = HSLUG[p[0]], file = slug.replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '') + '.json';
+        add('../texts/' + file); add('../texts_en/' + file); add('../texts_st_en/' + file);
+        if (!/Mitzvot$|Transmission_of_the_Oral_Law$/.test(slug))
+          add('https://www.sefaria.org/api/texts/' + encodeURIComponent('Steinsaltz on ' + slug.replace(/_/g, ' ').replace(' Their ', ' their ') +
+              ' ' + p[1] + ':1-' + p[4]) + '?context=0&commentary=0');
+      });
+      return out;
+    }
+    function run() {
+      if (!navigator.onLine || (navigator.connection && navigator.connection.saveData)) return;
+      var list = urls(), total = list.length, done = 0, failed = 0, i = 0, bytes = 0;
+      try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { /* ignore */ }
+      function tick() { say(done + failed >= total ? (failed ? 'Offline library: ' + failed + ' files will retry next time'
+                                : 'Offline ready ✓ — all texts and notes are saved on this device')
+                                : 'Saving for offline use… ' + Math.round(100 * (done + failed) / total) + '%'); }
+      function next() {
+        if (i >= list.length) return Promise.resolve();
+        var u = list[i++];
+        return caches.match(u, { ignoreSearch: false }).then(function (hit) {
+          if (hit) return;
+          return fetch(u).then(function (r) { if (!r.ok && r.status !== 404) throw new Error(r.status); return r.arrayBuffer(); })
+                         .then(function (b) { bytes += b.byteLength; });
+        }).then(function () { done++; }, function () { failed++; })
+          .then(function () { tick(); return new Promise(function (r) { setTimeout(r, /sefaria/.test(u) ? 120 : 0); }); })
+          .then(next);
+      }
+      tick();
+      Promise.all([next(), next(), next()]).then(tick);
+    }
+    navigator.serviceWorker.ready.then(function () { setTimeout(run, 4000); });
+  })();
 }
 </script>
 </body>
