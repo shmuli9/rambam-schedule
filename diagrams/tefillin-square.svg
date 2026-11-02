@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 220" role="img" aria-label="Tefillin must be square with equal diagonals, so all four angles are equal">
+<style>text{font-family:system-ui,sans-serif;fill:#223}.h{font-size:13px}.s{font-size:11px;fill:#556}.t{font-size:13px;font-weight:600}</style>
+<text x="16" y="22" class="t">Tefillin must be square · מרובעים</text>
+<rect x="60" y="40" width="150" height="150" fill="#f3efe6" stroke="#222" stroke-width="3"/>
+<path d="M60 40L210 190M210 40L60 190" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="6 4"/>
+<g fill="#c0392b" font-size="12" font-family="system-ui,sans-serif"><text x="68" y="62">90°</text><text x="178" y="62">90°</text><text x="68" y="182">90°</text><text x="178" y="182">90°</text></g>
+<text x="250" y="90" class="h">Both diagonals equal</text>
+<text x="250" y="108" class="s">→ all four angles equal (right angles)</text>
+<text x="250" y="140" class="h">Sewn closed in a square too</text>
+<text x="250" y="158" class="s">a stitched shape that is not square is unfit</text>
+</svg>

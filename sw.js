@@ -44,7 +44,7 @@ self.addEventListener('fetch', e => {
     url.pathname.startsWith('/api/texts/Steinsaltz');
   if (req.method !== 'GET' || (url.origin !== self.location.origin && !steinsaltz)) return;
   /* the English Steinsaltz notes are still being filled in: show the cached copy but refresh it behind */
-  if (/\/texts_st_en\/[^/]+\.json$/.test(url.pathname)) {
+  if (/\/(texts_st_en\/[^/]+\.json|diagrams\/[^/]+)$/.test(url.pathname)) {
     e.respondWith(
       caches.open(TEXT_CACHE).then(cache =>
         cache.match(req, { ignoreSearch: true }).then(hit => {

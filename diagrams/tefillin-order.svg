@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 250" role="img" aria-label="Order of the four passages in the head tefillin, as seen by someone facing the wearer">
+<style>text{font-family:system-ui,sans-serif;fill:#223}.h{font-size:13px}.s{font-size:11px;fill:#556}.t{font-size:13px;font-weight:600}.he{font-size:14px;direction:rtl}</style>
+<text x="16" y="22" class="t">Head tefillin – four compartments · ארבע בתים</text>
+<text x="260" y="44" class="s" text-anchor="middle">as seen by someone facing the wearer</text>
+<g fill="#f3efe6" stroke="#222" stroke-width="2.5"><rect x="30" y="60" width="115" height="90"/><rect x="145" y="60" width="115" height="90"/><rect x="260" y="60" width="115" height="90"/><rect x="375" y="60" width="115" height="90"/></g>
+<g text-anchor="middle" class="he"><text x="87" y="100" class="he" text-anchor="middle">והיה אם שמוע</text><text x="202" y="100" class="he" text-anchor="middle">שמע</text><text x="317" y="100" class="he" text-anchor="middle">והיה כי יביאך</text><text x="432" y="100" class="he" text-anchor="middle">קדש לי</text></g>
+<g text-anchor="middle" class="s"><text x="87" y="124">4th passage</text><text x="202" y="124">3rd</text><text x="317" y="124">2nd</text><text x="432" y="124">1st (Kadesh Li)</text></g>
+<text x="30" y="176" class="h">← wearer’s right</text>
+<text x="490" y="176" class="h" text-anchor="end">wearer’s left →</text>
+<text x="260" y="208" class="h" text-anchor="middle">Facing the wearer, read right to left in Torah order:</text>
+<text x="260" y="226" class="s" text-anchor="middle">Kadesh Li · V’hayah ki y’viacha · Shema · V’hayah im shamo’a</text>
+<text x="260" y="242" class="s" text-anchor="middle">Any other order makes them unfit.</text>
+</svg>

@@ -215,6 +215,11 @@
           margin-top: 3px; padding-top: 3px; border-top: 1px dotted #9db9d4; }
   .sten b { color: #1f4e79; }
   #txB.noEn .sten { display: none; }
+  .dgs { grid-column: 1 / -1; }
+  .dg { margin: 10px 0; padding: 8px; background: #fff; border: 1px solid var(--line); border-radius: 8px; text-align: center; }
+  .dg img { width: min(100%, 560px); height: auto; }
+  .dg figcaption { font-size: 12px; color: #667; margin-top: 4px; }
+  #txB.noDg .dgs { display: none; }
   .glnote b { color: #1f4e79; }
   #txB.allNotes .glnote[hidden] { display: block; }
   #txB.allNotes .fnote[hidden] { display: block; }
@@ -329,6 +334,7 @@
       <button data-v="He" aria-pressed="true" title="Hebrew text">עברית</button>
       <button data-v="En" aria-pressed="true" title="English translation (Touger)">English</button>
       <button data-v="Notes" aria-pressed="false" title="Open all the English explanatory notes (or tap a number to open just one)">All notes</button>
+      <button data-v="Dg" aria-pressed="true" title="Diagrams that illustrate the halakha">Diagrams</button>
       <button data-v="St" aria-pressed="false" title="Steinsaltz's modern Hebrew word-by-word explanation (needs a connection the first time)">Steinsaltz</button>
     </div>
     <div id="txB"></div>
@@ -1156,7 +1162,7 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
             '<div class="hl" dir="rtl" lang="he"><span class="hn">' + esc(f.pre) + (f.lo + j) + '</span>' + esc(t) + '</div>' +
             (e ? '<div class="eng" lang="en">' + enHtml(e[0]) + '</div>' + notesHtml(e[1]) :
                  en ? '' : '<div class="eng"><i>English not available (this text has none, or you are offline and have not opened it before).</i></div>') +
-            '<div class="stw"></div></div>' +
+            '<div class="dgs">' + dgHtml(f, j) + '</div><div class="stw"></div></div>' +
             (j === hs.length - 1 ? '<div class="mk en">■ END</div>' : '');
         }).join('');
         meta.insertAdjacentHTML('beforeend',
@@ -1171,6 +1177,15 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
           ') — you need to be online. Use the Sefaria link above.</div>';
       });
     });
+  }
+
+  /* Diagrams drawn for this app: diagrams/index.json maps a text file to [{p: perek, h: halakha, f: svg, c: caption}] */
+  let dgIndex = {};
+  fetch('../diagrams/index.json').then(r => r.ok ? r.json() : {}).then(d => { dgIndex = d; Object.keys(d).forEach(k => d[k].forEach(x => fetch('../diagrams/' + x.f).catch(() => {}))); }).catch(() => {});
+  function dgHtml(f, j) {
+    const slug = HSLUG[f.p[0]].replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, ''), perek = FLAT.test(HSLUG[f.p[0]]) ? 0 : f.p[1];
+    return (dgIndex[slug] || []).filter(x => (x.p || 0) === perek && x.h === f.lo + j).map(x =>
+      '<figure class="dg"><img src="../diagrams/' + x.f + '" alt="' + esc(x.c) + '" loading="lazy"><figcaption>' + esc(x.c) + '</figcaption></figure>').join('');
   }
 
   /* English is already escaped by fetch_text_en.py (only <i>/<b>/<br> and {n} markers remain) */
@@ -1249,13 +1264,14 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
 
   /* reading prefs: which layers are shown; remembered across visits */
   const VIEW_KEY = 'rambam-yad-view-v1';
-  const view = { He: true, En: true, Notes: false, St: false };
+  const view = { He: true, En: true, Notes: false, St: false, Dg: true };
   try { Object.assign(view, JSON.parse(localStorage.getItem(VIEW_KEY) || '{}')); } catch (e) { /* ignore */ }
   function applyView() {
     txB.classList.toggle('noHe', !view.He);
     txB.classList.toggle('noEn', !view.En);
     txB.classList.toggle('allNotes', view.Notes);
     txB.classList.toggle('noSt', !view.St);
+    txB.classList.toggle('noDg', !view.Dg);
     txB.classList.toggle('sbs', view.He && view.En);
     document.querySelectorAll('#txbar button').forEach(b => b.setAttribute('aria-pressed', view[b.dataset.v] ? 'true' : 'false'));
   }

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 318" role="img" aria-label="Sukkah measurements: height from 10 handbreadths to 20 cubits; floor area at least 7 by 7 handbreadths, no maximum">
+<style>text{font-family:system-ui,sans-serif;fill:#223}.h{font-size:13px}.s{font-size:11px;fill:#556}.t{font-size:13px;font-weight:600}.d{stroke:#c0392b;stroke-width:1.5;fill:none}</style>
+<text x="16" y="22" class="t">Side view · מבט מהצד</text>
+<path d="M60 170V50M200 170V50" stroke="#445" stroke-width="3" fill="none"/>
+<path d="M44 46H216" stroke="#2e7d32" stroke-width="5" stroke-linecap="round" stroke-dasharray="14 5"/>
+<text x="130" y="38" class="s" text-anchor="middle">schach · סכך</text>
+<path d="M44 170H216" stroke="#8d6e63" stroke-width="3"/>
+<path d="M238 50V170M232 50h12M232 170h12" class="d"/>
+<text x="254" y="96" class="h">at least 10 טפחים</text><text x="254" y="112" class="s">(handbreadths)</text>
+<text x="254" y="138" class="h">at most 20 אמה</text><text x="254" y="154" class="s">(cubits) – taller is invalid</text>
+<text x="16" y="208" class="t">Top view · מבט מלמעלה</text>
+<rect x="60" y="222" width="70" height="70" fill="#e8f5e9" stroke="#445" stroke-width="3"/>
+<path d="M142 222v70M138 222h8M138 292h8" class="d"/>
+<text x="95" y="312" class="h" text-anchor="middle">7 טפחים</text>
+<text x="154" y="261" class="h">7 טפחים</text>
+<text x="254" y="248" class="h">at least 7 × 7 handbreadths</text>
+<text x="254" y="266" class="s">no maximum – any larger area is fine</text>
+<text x="254" y="284" class="s">even a hair’s breadth less is invalid</text>
+</svg>
