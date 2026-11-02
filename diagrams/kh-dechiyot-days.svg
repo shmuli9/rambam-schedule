@@ -3,7 +3,7 @@
 <rect x="22" y="44" width="60" height="66" rx="6" fill="#ffcdd2" stroke="#c62828" stroke-width="2"/>
 <text x="52" y="68" class="h c" >Sun</text>
 <text x="52" y="94" class="he c" >א</text>
-<path d="M30 52l44 50M74 52l-44 50" stroke="#c62828" stroke-width="2"/>
+<path d="M30 52l44 50M74 52l-44 50" stroke="#c62828" stroke-width="2" stroke-opacity=".35"/>
 <rect x="90" y="44" width="60" height="66" rx="6" fill="#c8e6c9" stroke="#2e7d32" stroke-width="2"/>
 <text x="120" y="68" class="h c" >Mon</text>
 <text x="120" y="94" class="he c" >ב</text>
@@ -13,14 +13,14 @@
 <rect x="226" y="44" width="60" height="66" rx="6" fill="#ffcdd2" stroke="#c62828" stroke-width="2"/>
 <text x="256" y="68" class="h c" >Wed</text>
 <text x="256" y="94" class="he c" >ד</text>
-<path d="M234 52l44 50M278 52l-44 50" stroke="#c62828" stroke-width="2"/>
+<path d="M234 52l44 50M278 52l-44 50" stroke="#c62828" stroke-width="2" stroke-opacity=".35"/>
 <rect x="294" y="44" width="60" height="66" rx="6" fill="#c8e6c9" stroke="#2e7d32" stroke-width="2"/>
 <text x="324" y="68" class="h c" >Thu</text>
 <text x="324" y="94" class="he c" >ה</text>
 <rect x="362" y="44" width="60" height="66" rx="6" fill="#ffcdd2" stroke="#c62828" stroke-width="2"/>
 <text x="392" y="68" class="h c" >Fri</text>
 <text x="392" y="94" class="he c" >ו</text>
-<path d="M370 52l44 50M414 52l-44 50" stroke="#c62828" stroke-width="2"/>
+<path d="M370 52l44 50M414 52l-44 50" stroke="#c62828" stroke-width="2" stroke-opacity=".35"/>
 <rect x="430" y="44" width="60" height="66" rx="6" fill="#c8e6c9" stroke="#2e7d32" stroke-width="2"/>
 <text x="460" y="68" class="h c" >Sat</text>
 <text x="460" y="94" class="he c" >ש</text>
