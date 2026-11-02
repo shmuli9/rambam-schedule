@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 316" role="img" aria-label="Neighboring elements change into each other in both directions, but never entirely"><style>text{font-family:system-ui,sans-serif;fill:#223}.h{font-size:13px}.s{font-size:11px;fill:#556}.t{font-size:13px;font-weight:600}.he{font-size:14px}.w{fill:#fff;font-weight:600}.c{text-anchor:middle}</style>
+<text x="16" y="22" class="t" >Elements change into one another · חילוף</text>
+<rect x="150" y="40" width="220" height="38" rx="8" fill="#ffccbc" stroke="#445" stroke-width="1.5"/>
+<text x="166" y="64" class="t" >Fire</text>
+<text x="356" y="64" class="he" text-anchor="end">אש</text>
+<path d="M250 80L250 102M253.5 94.8L250 102L246.5 94.8" fill="none" stroke="#445" stroke-width="2"/>
+<path d="M270 102L270 80M266.5 87.2L270 80L273.5 87.2" fill="none" stroke="#445" stroke-width="2"/>
+<rect x="150" y="106" width="220" height="38" rx="8" fill="#e1f5fe" stroke="#445" stroke-width="1.5"/>
+<text x="166" y="130" class="t" >Wind</text>
+<text x="356" y="130" class="he" text-anchor="end">רוח</text>
+<path d="M250 146L250 168M253.5 160.8L250 168L246.5 160.8" fill="none" stroke="#445" stroke-width="2"/>
+<path d="M270 168L270 146M266.5 153.2L270 146L273.5 153.2" fill="none" stroke="#445" stroke-width="2"/>
+<rect x="150" y="172" width="220" height="38" rx="8" fill="#bbdefb" stroke="#445" stroke-width="1.5"/>
+<text x="166" y="196" class="t" >Water</text>
+<text x="356" y="196" class="he" text-anchor="end">מים</text>
+<path d="M250 212L250 234M253.5 226.8L250 234L246.5 226.8" fill="none" stroke="#445" stroke-width="2"/>
+<path d="M270 234L270 212M266.5 219.2L270 212L273.5 219.2" fill="none" stroke="#445" stroke-width="2"/>
+<rect x="150" y="238" width="220" height="38" rx="8" fill="#d7ccc8" stroke="#445" stroke-width="1.5"/>
+<text x="166" y="262" class="t" >Earth</text>
+<text x="356" y="262" class="he" text-anchor="end">עפר</text>
+<text x="16" y="262" class="h" >A portion of each, next to its neighbor, becomes that neighbor,</text>
+<text x="16" y="280" class="h" >little by little and in both directions, without end.</text>
+<text x="16" y="302" class="s" >Never the whole of an element: none can ever be wiped out.</text>
+</svg>

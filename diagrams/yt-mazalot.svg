@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 420" role="img" aria-label="The ninth sphere divided into twelve constellation sections"><style>text{font-family:system-ui,sans-serif;fill:#223}.h{font-size:13px}.s{font-size:11px;fill:#556}.t{font-size:13px;font-weight:600}.he{font-size:14px}.w{fill:#fff;font-weight:600}.c{text-anchor:middle}</style>
+<text x="16" y="22" class="t" >The ninth sphere in twelve sections · מזלות</text>
+<path d="M260.0 130.0L260.0 25.0A165 165 0 0 1 342.5 47.1L290.0 138.0A60 60 0 0 0 260.0 130.0Z" fill="#f3efe6" stroke="#445" stroke-width="1.5"/>
+<text x="289.1" y="79.3" class="h c" >Lamb</text>
+<text x="289.1" y="96.3" class="he c" >טלה</text>
+<path d="M290.0 138.0L342.5 47.1A165 165 0 0 1 402.9 107.5L312.0 160.0A60 60 0 0 0 290.0 138.0Z" fill="#e3e8ef" stroke="#445" stroke-width="1.5"/>
+<text x="339.5" y="108.5" class="h c" >Ox</text>
+<text x="339.5" y="125.5" class="he c" >שור</text>
+<path d="M312.0 160.0L402.9 107.5A165 165 0 0 1 425.0 190.0L320.0 190.0A60 60 0 0 0 312.0 160.0Z" fill="#f3efe6" stroke="#445" stroke-width="1.5"/>
+<text x="368.7" y="158.9" class="h c" >Twins</text>
+<text x="368.7" y="175.9" class="he c" >תאומים</text>
+<path d="M320.0 190.0L425.0 190.0A165 165 0 0 1 402.9 272.5L312.0 220.0A60 60 0 0 0 320.0 190.0Z" fill="#e3e8ef" stroke="#445" stroke-width="1.5"/>
+<text x="368.7" y="217.1" class="h c" >Crab</text>
+<text x="368.7" y="234.1" class="he c" >סרטן</text>
+<path d="M312.0 220.0L402.9 272.5A165 165 0 0 1 342.5 332.9L290.0 242.0A60 60 0 0 0 312.0 220.0Z" fill="#f3efe6" stroke="#445" stroke-width="1.5"/>
+<text x="339.5" y="267.5" class="h c" >Lion</text>
+<text x="339.5" y="284.5" class="he c" >אריה</text>
+<path d="M290.0 242.0L342.5 332.9A165 165 0 0 1 260.0 355.0L260.0 250.0A60 60 0 0 0 290.0 242.0Z" fill="#e3e8ef" stroke="#445" stroke-width="1.5"/>
+<text x="289.1" y="296.7" class="h c" >Virgin</text>
+<text x="289.1" y="313.7" class="he c" >בתולה</text>
+<path d="M260.0 250.0L260.0 355.0A165 165 0 0 1 177.5 332.9L230.0 242.0A60 60 0 0 0 260.0 250.0Z" fill="#f3efe6" stroke="#445" stroke-width="1.5"/>
+<text x="230.9" y="296.7" class="h c" >Scales</text>
+<text x="230.9" y="313.7" class="he c" >מאזנים</text>
+<path d="M230.0 242.0L177.5 332.9A165 165 0 0 1 117.1 272.5L208.0 220.0A60 60 0 0 0 230.0 242.0Z" fill="#e3e8ef" stroke="#445" stroke-width="1.5"/>
+<text x="180.5" y="267.5" class="h c" >Scorpion</text>
+<text x="180.5" y="284.5" class="he c" >עקרב</text>
+<path d="M208.0 220.0L117.1 272.5A165 165 0 0 1 95.0 190.0L200.0 190.0A60 60 0 0 0 208.0 220.0Z" fill="#f3efe6" stroke="#445" stroke-width="1.5"/>
+<text x="151.3" y="217.1" class="h c" >Bow</text>
+<text x="151.3" y="234.1" class="he c" >קשת</text>
+<path d="M200.0 190.0L95.0 190.0A165 165 0 0 1 117.1 107.5L208.0 160.0A60 60 0 0 0 200.0 190.0Z" fill="#e3e8ef" stroke="#445" stroke-width="1.5"/>
+<text x="151.3" y="158.9" class="h c" >Goat</text>
+<text x="151.3" y="175.9" class="he c" >גדי</text>
+<path d="M208.0 160.0L117.1 107.5A165 165 0 0 1 177.5 47.1L230.0 138.0A60 60 0 0 0 208.0 160.0Z" fill="#f3efe6" stroke="#445" stroke-width="1.5"/>
+<text x="180.5" y="108.5" class="h c" >Bucket</text>
+<text x="180.5" y="125.5" class="he c" >דלי</text>
+<path d="M230.0 138.0L177.5 47.1A165 165 0 0 1 260.0 25.0L260.0 130.0A60 60 0 0 0 230.0 138.0Z" fill="#e3e8ef" stroke="#445" stroke-width="1.5"/>
+<text x="230.9" y="79.3" class="h c" >Fish</text>
+<text x="230.9" y="96.3" class="he c" >דגים</text>
+<text x="260" y="184" class="s c" >ninth</text>
+<text x="260" y="198" class="s c" >sphere</text>
+<text x="16" y="392" class="s" >The sections are named for the shapes the stars of the eighth sphere form;</text>
+<text x="16" y="407" class="s" >the ninth sphere itself has no stars or shapes.</text>
+</svg>

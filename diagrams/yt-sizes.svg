@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 224" role="img" aria-label="The Earth is about 40 times the moon and the sun about 170 times the Earth"><style>text{font-family:system-ui,sans-serif;fill:#223}.h{font-size:13px}.s{font-size:11px;fill:#556}.t{font-size:13px;font-weight:600}.he{font-size:14px}.w{fill:#fff;font-weight:600}.c{text-anchor:middle}</style>
+<text x="16" y="22" class="t" >Relative sizes · גדלים</text>
+<rect x="30" y="50" width="80" height="80" rx="8" fill="#e3e8ef" stroke="#445" stroke-width="1.5"/>
+<text x="70" y="86" class="h c" >Moon</text>
+<text x="70" y="106" class="s c" >× 1</text>
+<path d="M114 90L180 90M172.8 86.5L180 90L172.8 93.5" fill="none" stroke="#445" stroke-width="2"/>
+<text x="147" y="80" class="s c" >× 40</text>
+<rect x="184" y="50" width="110" height="80" rx="8" fill="#c8e6c9" stroke="#445" stroke-width="1.5"/>
+<text x="239" y="86" class="h c" >Earth</text>
+<text x="239" y="106" class="s c" >× 40</text>
+<path d="M298 90L360 90M352.8 86.5L360 90L352.8 93.5" fill="none" stroke="#445" stroke-width="2"/>
+<text x="329" y="80" class="s c" >× 170</text>
+<rect x="364" y="50" width="130" height="80" rx="8" fill="#fff59d" stroke="#445" stroke-width="1.5"/>
+<text x="429" y="86" class="h c" >Sun</text>
+<text x="429" y="106" class="s c" >× 6800</text>
+<text x="30" y="164" class="h" >Earth ≈ 40 times the moon · Sun ≈ 170 times the Earth</text>
+<text x="30" y="184" class="h" >So the moon is about 1/6800 of the sun.</text>
+<text x="30" y="210" class="s" >Boxes show the ratios, not true proportions.</text>
+</svg>

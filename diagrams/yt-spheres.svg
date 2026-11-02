@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 360" role="img" aria-label="Nine concentric spheres around the Earth: moon, Kochav, Nogah, sun, Ma'dim, Tzedek, Shabbtai, the stars, and the outermost sphere"><style>text{font-family:system-ui,sans-serif;fill:#223}.h{font-size:13px}.s{font-size:11px;fill:#556}.t{font-size:13px;font-weight:600}.he{font-size:14px}.w{fill:#fff;font-weight:600}.c{text-anchor:middle}</style>
+<text x="16" y="22" class="t" >The nine spheres · תשע גלגלים</text>
+<circle cx="170" cy="195" r="150" fill="#f3efe6" stroke="#445" stroke-width="1.5"/>
+<circle cx="170" cy="195" r="136" fill="#e3e8ef" stroke="#445" stroke-width="1.5"/>
+<circle cx="170" cy="195" r="122" fill="#f3efe6" stroke="#445" stroke-width="1.5"/>
+<circle cx="170" cy="195" r="108" fill="#e3e8ef" stroke="#445" stroke-width="1.5"/>
+<circle cx="170" cy="195" r="94" fill="#f3efe6" stroke="#445" stroke-width="1.5"/>
+<circle cx="170" cy="195" r="80" fill="#fff59d" stroke="#445" stroke-width="1.5"/>
+<circle cx="170" cy="195" r="66" fill="#f3efe6" stroke="#445" stroke-width="1.5"/>
+<circle cx="170" cy="195" r="52" fill="#e3e8ef" stroke="#445" stroke-width="1.5"/>
+<circle cx="170" cy="195" r="38" fill="#f3efe6" stroke="#445" stroke-width="1.5"/>
+<circle cx="170" cy="195" r="14" fill="#8bc34a" stroke="#33691e" stroke-width="1.5"/>
+<text x="170" y="199" class="s c" style="font-size:9px">Earth</text>
+<text x="170" y="168" class="s c" style="font-weight:600">1</text>
+<text x="170" y="154" class="s c" style="font-weight:600">2</text>
+<text x="170" y="140" class="s c" style="font-weight:600">3</text>
+<text x="170" y="126" class="s c" style="font-weight:600">4</text>
+<text x="170" y="112" class="s c" style="font-weight:600">5</text>
+<text x="170" y="98" class="s c" style="font-weight:600">6</text>
+<text x="170" y="84" class="s c" style="font-weight:600">7</text>
+<text x="170" y="70" class="s c" style="font-weight:600">8</text>
+<text x="170" y="56" class="s c" style="font-weight:600">9</text>
+<text x="358" y="78" class="t" >1</text>
+<text x="374" y="78" class="h" >Moon · ירח</text>
+<text x="358" y="104" class="t" >2</text>
+<text x="374" y="104" class="h" >Kochav · כוכב</text>
+<text x="358" y="130" class="t" >3</text>
+<text x="374" y="130" class="h" >Nogah · נוגה</text>
+<text x="358" y="156" class="t" >4</text>
+<text x="374" y="156" class="h" >Sun · שמש</text>
+<text x="358" y="182" class="t" >5</text>
+<text x="374" y="182" class="h" >Ma'dim · מאדים</text>
+<text x="358" y="208" class="t" >6</text>
+<text x="374" y="208" class="h" >Tzedek · צדק</text>
+<text x="358" y="234" class="t" >7</text>
+<text x="374" y="234" class="h" >Shabbtai · שבתאי</text>
+<text x="358" y="260" class="t" >8</text>
+<text x="374" y="260" class="h" >all the stars</text>
+<text x="358" y="286" class="t" >9</text>
+<text x="374" y="286" class="h" >outermost sphere</text>
+<text x="374" y="300" class="s" >turns daily east to west</text>
+</svg>

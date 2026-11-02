@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 386" role="img" aria-label="Fire, wind, water and earth stacked from lightest to heaviest with their qualities"><style>text{font-family:system-ui,sans-serif;fill:#223}.h{font-size:13px}.s{font-size:11px;fill:#556}.t{font-size:13px;font-weight:600}.he{font-size:14px}.w{fill:#fff;font-weight:600}.c{text-anchor:middle}</style>
+<text x="16" y="22" class="t" >The four elements · ארבעה יסודות</text>
+<rect x="120" y="44" width="300" height="56" rx="8" fill="#ffccbc" stroke="#445" stroke-width="1.5"/>
+<text x="136" y="68" class="t" >Fire</text>
+<text x="406" y="68" class="he" text-anchor="end">אש</text>
+<text x="136" y="88" class="s" >warm and dry · lightest</text>
+<rect x="120" y="108" width="300" height="56" rx="8" fill="#e1f5fe" stroke="#445" stroke-width="1.5"/>
+<text x="136" y="132" class="t" >Wind</text>
+<text x="406" y="132" class="he" text-anchor="end">רוח</text>
+<text x="136" y="152" class="s" >warm and moist</text>
+<rect x="120" y="172" width="300" height="56" rx="8" fill="#bbdefb" stroke="#445" stroke-width="1.5"/>
+<text x="136" y="196" class="t" >Water</text>
+<text x="406" y="196" class="he" text-anchor="end">מים</text>
+<text x="136" y="216" class="s" >cold and moist</text>
+<rect x="120" y="236" width="300" height="56" rx="8" fill="#d7ccc8" stroke="#445" stroke-width="1.5"/>
+<text x="136" y="260" class="t" >Earth</text>
+<text x="406" y="260" class="he" text-anchor="end">עפר</text>
+<text x="136" y="280" class="s" >cold and dry · heaviest</text>
+<path d="M70 120L70 54M66.5 61.2L70 54L73.5 61.2" fill="none" stroke="#c62828" stroke-width="2"/>
+<text x="70" y="134" class="s c" >rise</text>
+<text x="70" y="148" class="s c" >toward</text>
+<text x="70" y="162" class="s c" >the sky</text>
+<path d="M70 186L70 252M73.5 244.8L70 252L66.5 244.8" fill="none" stroke="#1565c0" stroke-width="2"/>
+<text x="40" y="336" class="h" >Fire and wind tend upward; water and earth tend</text>
+<text x="40" y="354" class="h" >downward toward the center. This is their nature,</text>
+<text x="40" y="372" class="h" >not a choice. Lighter elements sit above heavier ones.</text>
+</svg>

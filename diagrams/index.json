@@ -70,5 +70,49 @@
    "f": "kh-year-types.svg",
    "c": "Lacking, in-order and complete years"
   }
+ ],
+ "Mishneh_Torah_Foundations_of_the_Torah": [
+  {
+   "p": 2,
+   "h": 3,
+   "f": "yt-three-kinds.svg",
+   "c": "Three kinds of created things"
+  },
+  {
+   "p": 2,
+   "h": 7,
+   "f": "yt-angels.svg",
+   "c": "The ten levels of angels"
+  },
+  {
+   "p": 3,
+   "h": 1,
+   "f": "yt-spheres.svg",
+   "c": "The nine spheres around the Earth"
+  },
+  {
+   "p": 3,
+   "h": 6,
+   "f": "yt-mazalot.svg",
+   "c": "The twelve sections of the ninth sphere"
+  },
+  {
+   "p": 3,
+   "h": 8,
+   "f": "yt-sizes.svg",
+   "c": "Relative sizes of moon, Earth and sun"
+  },
+  {
+   "p": 4,
+   "h": 2,
+   "f": "yt-elements.svg",
+   "c": "The four elements"
+  },
+  {
+   "p": 4,
+   "h": 5,
+   "f": "yt-elements-cycle.svg",
+   "c": "Elements changing into one another"
+  }
  ]
 }
