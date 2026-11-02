@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 274" role="img" aria-label="Lengths of an ordinary lunar year, a solar year and a leap year, drawn to scale"><style>text{font-family:system-ui,sans-serif;fill:#223}.h{font-size:13px}.s{font-size:11px;fill:#556}.t{font-size:13px;font-weight:600}.he{font-size:14px}.w{fill:#fff;font-weight:600}.c{text-anchor:middle}</style>
+<text x="16" y="22" class="t" >Year lengths · אורך השנה</text>
+<text x="30" y="46" class="h" >Ordinary lunar year (12 months)</text>
+<rect x="30" y="52" width="216" height="28" rx="0" fill="#bbdefb" stroke="#445" stroke-width="1.5"/>
+<text x="254" y="71" class="s" >354 d 8 h 876</text>
+<text x="30" y="104" class="h" >Solar year</text>
+<rect x="30" y="110" width="261.0" height="28" rx="0" fill="#fff59d" stroke="#445" stroke-width="1.5"/>
+<text x="299.0" y="129" class="s" >365 d 6 h</text>
+<text x="30" y="162" class="h" >Leap lunar year (13 months)</text>
+<rect x="30" y="168" width="332" height="28" rx="0" fill="#c8e6c9" stroke="#445" stroke-width="1.5"/>
+<text x="370" y="187" class="s" >383 d 21 h 589</text>
+<text x="16" y="222" class="h" >Solar year – ordinary lunar year = 10 d 21 h 204 chalakim</text>
+<text x="16" y="240" class="s" >This gap is why a leap month is added.</text>
+<text x="16" y="262" class="s" >bars drawn to scale from 300 days</text>
+</svg>

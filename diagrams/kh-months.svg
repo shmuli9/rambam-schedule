@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 330" role="img" aria-label="Month lengths of the fixed calendar: Tishrei 30, Tevet 29, then alternating; Cheshvan and Kislev vary"><style>text{font-family:system-ui,sans-serif;fill:#223}.h{font-size:13px}.s{font-size:11px;fill:#556}.t{font-size:13px;font-weight:600}.he{font-size:14px}.w{fill:#fff;font-weight:600}.c{text-anchor:middle}</style>
+<text x="16" y="22" class="t" >Full and lacking months · מלאים וחסרים</text>
+<rect x="30" y="40" width="224" height="32" rx="6" fill="#c8e6c9" stroke="#445" stroke-width="1.5"/>
+<text x="40" y="61" class="h" >Tishrei</text>
+<text x="244" y="61" class="he" text-anchor="end">תשרי</text>
+<text x="142" y="61" class="h c" >30</text>
+<rect x="30" y="80" width="224" height="32" rx="6" fill="#e1bee7" stroke="#445" stroke-width="1.5"/>
+<text x="40" y="101" class="h" >Cheshvan</text>
+<text x="244" y="101" class="he" text-anchor="end">מרחשון</text>
+<text x="142" y="101" class="h c" >29 / 30</text>
+<rect x="30" y="120" width="224" height="32" rx="6" fill="#e1bee7" stroke="#445" stroke-width="1.5"/>
+<text x="40" y="141" class="h" >Kislev</text>
+<text x="244" y="141" class="he" text-anchor="end">כסלו</text>
+<text x="142" y="141" class="h c" >29 / 30</text>
+<rect x="30" y="160" width="224" height="32" rx="6" fill="#bbdefb" stroke="#445" stroke-width="1.5"/>
+<text x="40" y="181" class="h" >Tevet</text>
+<text x="244" y="181" class="he" text-anchor="end">טבת</text>
+<text x="142" y="181" class="h c" >29</text>
+<rect x="30" y="200" width="224" height="32" rx="6" fill="#c8e6c9" stroke="#445" stroke-width="1.5"/>
+<text x="40" y="221" class="h" >Shevat</text>
+<text x="244" y="221" class="he" text-anchor="end">שבט</text>
+<text x="142" y="221" class="h c" >30</text>
+<rect x="30" y="240" width="224" height="32" rx="6" fill="#bbdefb" stroke="#445" stroke-width="1.5"/>
+<text x="40" y="261" class="h" >Adar</text>
+<text x="244" y="261" class="he" text-anchor="end">אדר</text>
+<text x="142" y="261" class="h c" >29</text>
+<rect x="270" y="40" width="224" height="32" rx="6" fill="#c8e6c9" stroke="#445" stroke-width="1.5"/>
+<text x="280" y="61" class="h" >Nisan</text>
+<text x="484" y="61" class="he" text-anchor="end">ניסן</text>
+<text x="382" y="61" class="h c" >30</text>
+<rect x="270" y="80" width="224" height="32" rx="6" fill="#bbdefb" stroke="#445" stroke-width="1.5"/>
+<text x="280" y="101" class="h" >Iyar</text>
+<text x="484" y="101" class="he" text-anchor="end">אייר</text>
+<text x="382" y="101" class="h c" >29</text>
+<rect x="270" y="120" width="224" height="32" rx="6" fill="#c8e6c9" stroke="#445" stroke-width="1.5"/>
+<text x="280" y="141" class="h" >Sivan</text>
+<text x="484" y="141" class="he" text-anchor="end">סיון</text>
+<text x="382" y="141" class="h c" >30</text>
+<rect x="270" y="160" width="224" height="32" rx="6" fill="#bbdefb" stroke="#445" stroke-width="1.5"/>
+<text x="280" y="181" class="h" >Tammuz</text>
+<text x="484" y="181" class="he" text-anchor="end">תמוז</text>
+<text x="382" y="181" class="h c" >29</text>
+<rect x="270" y="200" width="224" height="32" rx="6" fill="#c8e6c9" stroke="#445" stroke-width="1.5"/>
+<text x="280" y="221" class="h" >Av</text>
+<text x="484" y="221" class="he" text-anchor="end">אב</text>
+<text x="382" y="221" class="h c" >30</text>
+<rect x="270" y="240" width="224" height="32" rx="6" fill="#bbdefb" stroke="#445" stroke-width="1.5"/>
+<text x="280" y="261" class="h" >Elul</text>
+<text x="484" y="261" class="he" text-anchor="end">אלול</text>
+<text x="382" y="261" class="h c" >29</text>
+<text x="30" y="292" class="h" >In a leap year: Adar I = 30, Adar II = 29</text>
+<rect x="30" y="306" width="14" height="14" rx="3" fill="#c8e6c9" stroke="#445" stroke-width="1"/>
+<text x="50" y="318" class="s" >full (30)</text>
+<rect x="120" y="306" width="14" height="14" rx="3" fill="#bbdefb" stroke="#445" stroke-width="1"/>
+<text x="140" y="318" class="s" >lacking (29)</text>
+<rect x="230" y="306" width="14" height="14" rx="3" fill="#e1bee7" stroke="#445" stroke-width="1"/>
+<text x="250" y="318" class="s" >varies with the year (see 8:6–8)</text>
+</svg>

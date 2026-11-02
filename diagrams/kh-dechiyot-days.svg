@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 214" role="img" aria-label="Rosh Chodesh Tishrei is never Sunday, Wednesday or Friday; it moves to the next day"><style>text{font-family:system-ui,sans-serif;fill:#223}.h{font-size:13px}.s{font-size:11px;fill:#556}.t{font-size:13px;font-weight:600}.he{font-size:14px}.w{fill:#fff;font-weight:600}.c{text-anchor:middle}</style>
+<text x="16" y="22" class="t" >Rosh HaShanah is never on Sun, Wed or Fri · אד"ו</text>
+<rect x="22" y="44" width="60" height="66" rx="6" fill="#ffcdd2" stroke="#c62828" stroke-width="2"/>
+<text x="52" y="68" class="h c" >Sun</text>
+<text x="52" y="94" class="he c" >א</text>
+<path d="M30 52l44 50M74 52l-44 50" stroke="#c62828" stroke-width="2"/>
+<rect x="90" y="44" width="60" height="66" rx="6" fill="#c8e6c9" stroke="#2e7d32" stroke-width="2"/>
+<text x="120" y="68" class="h c" >Mon</text>
+<text x="120" y="94" class="he c" >ב</text>
+<rect x="158" y="44" width="60" height="66" rx="6" fill="#c8e6c9" stroke="#2e7d32" stroke-width="2"/>
+<text x="188" y="68" class="h c" >Tue</text>
+<text x="188" y="94" class="he c" >ג</text>
+<rect x="226" y="44" width="60" height="66" rx="6" fill="#ffcdd2" stroke="#c62828" stroke-width="2"/>
+<text x="256" y="68" class="h c" >Wed</text>
+<text x="256" y="94" class="he c" >ד</text>
+<path d="M234 52l44 50M278 52l-44 50" stroke="#c62828" stroke-width="2"/>
+<rect x="294" y="44" width="60" height="66" rx="6" fill="#c8e6c9" stroke="#2e7d32" stroke-width="2"/>
+<text x="324" y="68" class="h c" >Thu</text>
+<text x="324" y="94" class="he c" >ה</text>
+<rect x="362" y="44" width="60" height="66" rx="6" fill="#ffcdd2" stroke="#c62828" stroke-width="2"/>
+<text x="392" y="68" class="h c" >Fri</text>
+<text x="392" y="94" class="he c" >ו</text>
+<path d="M370 52l44 50M414 52l-44 50" stroke="#c62828" stroke-width="2"/>
+<rect x="430" y="44" width="60" height="66" rx="6" fill="#c8e6c9" stroke="#2e7d32" stroke-width="2"/>
+<text x="460" y="68" class="h c" >Sat</text>
+<text x="460" y="94" class="he c" >ש</text>
+<path d="M52 112v14h68v-12" fill="none" stroke="#c62828" stroke-width="2"/><path d="M120 114l-5 -8m5 8l5 -8" stroke="#c62828" stroke-width="2"/>
+<path d="M256 112v14h68v-12" fill="none" stroke="#c62828" stroke-width="2"/><path d="M324 114l-5 -8m5 8l5 -8" stroke="#c62828" stroke-width="2"/>
+<path d="M392 112v14h68v-12" fill="none" stroke="#c62828" stroke-width="2"/><path d="M460 114l-5 -8m5 8l5 -8" stroke="#c62828" stroke-width="2"/>
+<text x="22" y="158" class="h" >If the conjunction of Tishrei falls on one of these,</text>
+<text x="22" y="176" class="h" >Rosh Chodesh Tishrei is the next day:</text>
+<text x="22" y="200" class="h" >Sunday → Monday  ·  Wednesday → Thursday  ·  Friday → Sabbath</text>
+</svg>

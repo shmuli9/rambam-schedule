@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 264" role="img" aria-label="A conjunction at noon or later moves Rosh Chodesh Tishrei to the next day"><style>text{font-family:system-ui,sans-serif;fill:#223}.h{font-size:13px}.s{font-size:11px;fill:#556}.t{font-size:13px;font-weight:600}.he{font-size:14px}.w{fill:#fff;font-weight:600}.c{text-anchor:middle}</style>
+<text x="16" y="22" class="t" >The noon rule · מולד זקן</text>
+<rect x="30" y="44" width="230" height="40" rx="0" fill="#fff9c4" stroke="#445" stroke-width="2"/>
+<rect x="260" y="44" width="230" height="40" rx="0" fill="#ffe0b2" stroke="#445" stroke-width="2"/>
+<text x="145" y="69" class="h c" >daybreak → 6 h (noon)</text>
+<text x="375" y="69" class="h c" >noon or later</text>
+<text x="145" y="106" class="s c" >before noon,</text>
+<text x="145" y="121" class="s c" >even by one chalaq:</text>
+<text x="145" y="136" class="h c" >same day</text>
+<text x="375" y="106" class="s c" >conjunction at 6 h or later:</text>
+<text x="375" y="136" class="h c" >postponed to the next day</text>
+<text x="145" y="154" class="s c" >(if not Sun / Wed / Fri)</text>
+<text x="30" y="188" class="h" >If the next day is Sun, Wed or Fri, postpone once more:</text>
+<text x="30" y="210" class="h" >Sabbath after noon → Monday</text>
+<text x="30" y="230" class="h" >Tuesday at or after noon → Thursday</text>
+<text x="30" y="250" class="h" >Monday at 6 h or later → Tuesday</text>
+</svg>

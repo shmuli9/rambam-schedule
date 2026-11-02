@@ -1,2 +1,74 @@
-{"Mishneh_Torah_Shofar_Sukkah_and_Lulav":[{"p":4,"h":1,"f":"sukkah-size.svg","c":"Sukkah measurements"}],
- "Mishneh_Torah_Tefillin_Mezuzah_and_the_Torah_Scroll":[{"p":3,"h":1,"f":"tefillin-square.svg","c":"Square tefillin, equal diagonals"},{"p":3,"h":5,"f":"tefillin-order.svg","c":"Order of the passages in the head tefillin"}]}
+{
+ "Mishneh_Torah_Shofar_Sukkah_and_Lulav": [
+  {
+   "p": 4,
+   "h": 1,
+   "f": "sukkah-size.svg",
+   "c": "Sukkah measurements"
+  }
+ ],
+ "Mishneh_Torah_Tefillin_Mezuzah_and_the_Torah_Scroll": [
+  {
+   "p": 3,
+   "h": 1,
+   "f": "tefillin-square.svg",
+   "c": "Square tefillin, equal diagonals"
+  },
+  {
+   "p": 3,
+   "h": 5,
+   "f": "tefillin-order.svg",
+   "c": "Order of the passages in the head tefillin"
+  }
+ ],
+ "Mishneh_Torah_Sanctification_of_the_New_Month": [
+  {
+   "p": 6,
+   "h": 3,
+   "f": "kh-chalakim.svg",
+   "c": "Chalakim and the length of a lunar month"
+  },
+  {
+   "p": 6,
+   "h": 4,
+   "f": "kh-year-lengths.svg",
+   "c": "Lengths of the lunar, leap and solar years (to scale)"
+  },
+  {
+   "p": 6,
+   "h": 7,
+   "f": "kh-molad-example.svg",
+   "c": "Worked example: Nisan conjunction to Iyar"
+  },
+  {
+   "p": 6,
+   "h": 11,
+   "f": "kh-machzor.svg",
+   "c": "The 19-year cycle and its leap years"
+  },
+  {
+   "p": 7,
+   "h": 1,
+   "f": "kh-dechiyot-days.svg",
+   "c": "Days Rosh HaShanah cannot fall on"
+  },
+  {
+   "p": 7,
+   "h": 2,
+   "f": "kh-noon-rule.svg",
+   "c": "The noon rule"
+  },
+  {
+   "p": 8,
+   "h": 5,
+   "f": "kh-months.svg",
+   "c": "Full and lacking months"
+  },
+  {
+   "p": 8,
+   "h": 7,
+   "f": "kh-year-types.svg",
+   "c": "Lacking, in-order and complete years"
+  }
+ ]
+}

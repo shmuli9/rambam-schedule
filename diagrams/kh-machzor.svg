@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 236" role="img" aria-label="The nineteen-year cycle with leap years 3, 6, 8, 11, 14, 17 and 19"><style>text{font-family:system-ui,sans-serif;fill:#223}.h{font-size:13px}.s{font-size:11px;fill:#556}.t{font-size:13px;font-weight:600}.he{font-size:14px}.w{fill:#fff;font-weight:600}.c{text-anchor:middle}</style>
+<text x="16" y="22" class="t" >The 19-year cycle (machzor) · מחזור: 12 ordinary + 7 leap years</text>
+<rect x="30" y="44" width="40" height="52" rx="6" fill="#e3e8ef" stroke="#445" stroke-width="1.5"/>
+<text x="50" y="68" class="he c" >1</text>
+<text x="50" y="87" class="s c" >12 mo</text>
+<rect x="76" y="44" width="40" height="52" rx="6" fill="#e3e8ef" stroke="#445" stroke-width="1.5"/>
+<text x="96" y="68" class="he c" >2</text>
+<text x="96" y="87" class="s c" >12 mo</text>
+<rect x="122" y="44" width="40" height="52" rx="6" fill="#2e7d32" stroke="#445" stroke-width="1.5"/>
+<text x="142" y="68" class="he w c" >3</text>
+<text x="142" y="87" class="s c" style="fill:#fff">13 mo</text>
+<rect x="168" y="44" width="40" height="52" rx="6" fill="#e3e8ef" stroke="#445" stroke-width="1.5"/>
+<text x="188" y="68" class="he c" >4</text>
+<text x="188" y="87" class="s c" >12 mo</text>
+<rect x="214" y="44" width="40" height="52" rx="6" fill="#e3e8ef" stroke="#445" stroke-width="1.5"/>
+<text x="234" y="68" class="he c" >5</text>
+<text x="234" y="87" class="s c" >12 mo</text>
+<rect x="260" y="44" width="40" height="52" rx="6" fill="#2e7d32" stroke="#445" stroke-width="1.5"/>
+<text x="280" y="68" class="he w c" >6</text>
+<text x="280" y="87" class="s c" style="fill:#fff">13 mo</text>
+<rect x="306" y="44" width="40" height="52" rx="6" fill="#e3e8ef" stroke="#445" stroke-width="1.5"/>
+<text x="326" y="68" class="he c" >7</text>
+<text x="326" y="87" class="s c" >12 mo</text>
+<rect x="352" y="44" width="40" height="52" rx="6" fill="#2e7d32" stroke="#445" stroke-width="1.5"/>
+<text x="372" y="68" class="he w c" >8</text>
+<text x="372" y="87" class="s c" style="fill:#fff">13 mo</text>
+<rect x="398" y="44" width="40" height="52" rx="6" fill="#e3e8ef" stroke="#445" stroke-width="1.5"/>
+<text x="418" y="68" class="he c" >9</text>
+<text x="418" y="87" class="s c" >12 mo</text>
+<rect x="444" y="44" width="40" height="52" rx="6" fill="#e3e8ef" stroke="#445" stroke-width="1.5"/>
+<text x="464" y="68" class="he c" >10</text>
+<text x="464" y="87" class="s c" >12 mo</text>
+<rect x="30" y="110" width="40" height="52" rx="6" fill="#2e7d32" stroke="#445" stroke-width="1.5"/>
+<text x="50" y="134" class="he w c" >11</text>
+<text x="50" y="153" class="s c" style="fill:#fff">13 mo</text>
+<rect x="76" y="110" width="40" height="52" rx="6" fill="#e3e8ef" stroke="#445" stroke-width="1.5"/>
+<text x="96" y="134" class="he c" >12</text>
+<text x="96" y="153" class="s c" >12 mo</text>
+<rect x="122" y="110" width="40" height="52" rx="6" fill="#e3e8ef" stroke="#445" stroke-width="1.5"/>
+<text x="142" y="134" class="he c" >13</text>
+<text x="142" y="153" class="s c" >12 mo</text>
+<rect x="168" y="110" width="40" height="52" rx="6" fill="#2e7d32" stroke="#445" stroke-width="1.5"/>
+<text x="188" y="134" class="he w c" >14</text>
+<text x="188" y="153" class="s c" style="fill:#fff">13 mo</text>
+<rect x="214" y="110" width="40" height="52" rx="6" fill="#e3e8ef" stroke="#445" stroke-width="1.5"/>
+<text x="234" y="134" class="he c" >15</text>
+<text x="234" y="153" class="s c" >12 mo</text>
+<rect x="260" y="110" width="40" height="52" rx="6" fill="#e3e8ef" stroke="#445" stroke-width="1.5"/>
+<text x="280" y="134" class="he c" >16</text>
+<text x="280" y="153" class="s c" >12 mo</text>
+<rect x="306" y="110" width="40" height="52" rx="6" fill="#2e7d32" stroke="#445" stroke-width="1.5"/>
+<text x="326" y="134" class="he w c" >17</text>
+<text x="326" y="153" class="s c" style="fill:#fff">13 mo</text>
+<rect x="352" y="110" width="40" height="52" rx="6" fill="#e3e8ef" stroke="#445" stroke-width="1.5"/>
+<text x="372" y="134" class="he c" >18</text>
+<text x="372" y="153" class="s c" >12 mo</text>
+<rect x="398" y="110" width="40" height="52" rx="6" fill="#2e7d32" stroke="#445" stroke-width="1.5"/>
+<text x="418" y="134" class="he w c" >19</text>
+<text x="418" y="153" class="s c" style="fill:#fff">13 mo</text>
+<rect x="30" y="186" width="14" height="14" rx="3" fill="#2e7d32" stroke="#445" stroke-width="1"/>
+<text x="52" y="198" class="h" >leap year: years 3, 6, 8, 11, 14, 17, 19</text>
+<rect x="30" y="210" width="14" height="14" rx="3" fill="#e3e8ef" stroke="#445" stroke-width="1"/>
+<text x="52" y="222" class="h" >ordinary year</text>
+</svg>

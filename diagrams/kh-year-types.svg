@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 366" role="img" aria-label="Years of lacking, ordinary and complete months, by the number of days between Rosh HaShanahs"><style>text{font-family:system-ui,sans-serif;fill:#223}.h{font-size:13px}.s{font-size:11px;fill:#556}.t{font-size:13px;font-weight:600}.he{font-size:14px}.w{fill:#fff;font-weight:600}.c{text-anchor:middle}</style>
+<text x="16" y="22" class="t" >Lacking, in order or complete? · חסרה · כסדרן · שלמה</text>
+<text x="16" y="44" class="s" >Count the days between this Rosh HaShanah and the next</text>
+<text x="16" y="58" class="s" >(not counting either Rosh HaShanah itself):</text>
+<text x="16" y="92" class="t" >Ordinary year</text>
+<rect x="16" y="104" width="156" height="96" rx="8" fill="#ffcdd2" stroke="#445" stroke-width="1.5"/>
+<text x="94" y="136" class="h c" style="font-size:20px;font-weight:600">2 days</text>
+<text x="94" y="158" class="h c" >lacking · חסרה</text>
+<text x="94" y="180" class="s c" >Cheshvan 29 · Kislev 29</text>
+<rect x="182" y="104" width="156" height="96" rx="8" fill="#fff9c4" stroke="#445" stroke-width="1.5"/>
+<text x="260" y="136" class="h c" style="font-size:20px;font-weight:600">3 days</text>
+<text x="260" y="158" class="h c" >in order · כסדרן</text>
+<text x="260" y="180" class="s c" >Cheshvan 29 · Kislev 30</text>
+<rect x="348" y="104" width="156" height="96" rx="8" fill="#c8e6c9" stroke="#445" stroke-width="1.5"/>
+<text x="426" y="136" class="h c" style="font-size:20px;font-weight:600">4 days</text>
+<text x="426" y="158" class="h c" >complete · שלמה</text>
+<text x="426" y="180" class="s c" >Cheshvan 30 · Kislev 30</text>
+<text x="16" y="232" class="t" >Leap year</text>
+<rect x="16" y="244" width="156" height="96" rx="8" fill="#ffcdd2" stroke="#445" stroke-width="1.5"/>
+<text x="94" y="276" class="h c" style="font-size:20px;font-weight:600">4 days</text>
+<text x="94" y="298" class="h c" >lacking · חסרה</text>
+<text x="94" y="320" class="s c" >Cheshvan 29 · Kislev 29</text>
+<rect x="182" y="244" width="156" height="96" rx="8" fill="#fff9c4" stroke="#445" stroke-width="1.5"/>
+<text x="260" y="276" class="h c" style="font-size:20px;font-weight:600">5 days</text>
+<text x="260" y="298" class="h c" >in order · כסדרן</text>
+<text x="260" y="320" class="s c" >Cheshvan 29 · Kislev 30</text>
+<rect x="348" y="244" width="156" height="96" rx="8" fill="#c8e6c9" stroke="#445" stroke-width="1.5"/>
+<text x="426" y="276" class="h c" style="font-size:20px;font-weight:600">6 days</text>
+<text x="426" y="298" class="h c" >complete · שלמה</text>
+<text x="426" y="320" class="s c" >Cheshvan 30 · Kislev 30</text>
+</svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 276" role="img" aria-label="Adding one month to the Nisan conjunction gives the Iyar conjunction"><style>text{font-family:system-ui,sans-serif;fill:#223}.h{font-size:13px}.s{font-size:11px;fill:#556}.t{font-size:13px;font-weight:600}.he{font-size:14px}.w{fill:#fff;font-weight:600}.c{text-anchor:middle}</style>
+<text x="16" y="22" class="t" >Finding the next conjunction · חישוב המולד</text>
+<text x="30" y="52" class="h" >Nisan conjunction</text>
+<text x="300" y="52" class="h" >Sun, 5 h 107 after daybreak</text>
+<text x="300" y="69" class="s" >1 – 5 – 107</text>
+<text x="30" y="98" class="h" >+ one lunar month</text>
+<text x="300" y="98" class="h" >1 – 12 – 793</text>
+<path d="M30 112H490" stroke="#445" stroke-width="2"/>
+<text x="30" y="138" class="h" >Add each column</text>
+<text x="300" y="138" class="h" >2 – 17 – 900</text>
+<text x="300" y="155" class="s" >107+793 = 900 · 5+12 = 17 h · 1+1 = 2</text>
+<rect x="30" y="176" width="460" height="64" rx="8" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
+<text x="44" y="200" class="h" >Iyar conjunction: Tuesday night,</text>
+<text x="44" y="220" class="h" >5 hours 900 chalakim after nightfall  (3 – 5 – 900)</text>
+<text x="30" y="262" class="s" >Hours past 12 fall in the night, and the night belongs to the next day.</text>
+</svg>
