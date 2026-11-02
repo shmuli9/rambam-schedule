@@ -1267,6 +1267,12 @@ def write_html(entries, params, out_path):
   .dg img { width: min(100%, 560px); height: auto; }
   .dg figcaption { font-size: 12px; color: #667; margin-top: 4px; }
   #txB.noDg .dgs { display: none; }
+  .dgh { display: none; }
+  @media (max-width: 640px) {
+    .dg { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .dg img { width: 520px; max-width: none; }
+    .dgh { display: block; font-size: 11px; color: #889; }
+  }
   .glnote b { color: #1f4e79; }
   #txB.allNotes .glnote[hidden] { display: block; }
   #txB.allNotes .fnote[hidden] { display: block; }
@@ -2225,7 +2231,7 @@ const PWORD = PERAKIM.map(p => p[2].split(',').map(Number));
   function dgHtml(f, j) {
     const slug = HSLUG[f.p[0]].replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, ''), perek = FLAT.test(HSLUG[f.p[0]]) ? 0 : f.p[1];
     return (dgIndex[slug] || []).filter(x => (x.p || 0) === perek && x.h === f.lo + j).map(x =>
-      '<figure class="dg"><img src="../diagrams/' + x.f + '" alt="' + esc(x.c) + '" loading="lazy"><figcaption>' + esc(x.c) + '</figcaption></figure>').join('');
+      '<figure class="dg"><img src="../diagrams/' + x.f + '" alt="' + esc(x.c) + '" loading="lazy"><figcaption>' + esc(x.c) + '<span class="dgh">swipe sideways to see all of it</span></figcaption></figure>').join('');
   }
 
   /* English is already escaped by fetch_text_en.py (only <i>/<b>/<br> and {n} markers remain) */
